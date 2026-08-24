@@ -1,0 +1,225 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" style="font-family:'DM Mono',monospace">
+  <defs>
+    <style>
+      .tier-label { font-family: 'DM Mono', monospace; font-size: 11px; fill: #c9a45a; letter-spacing: 0.15em; text-transform: uppercase; }
+      .box-label  { font-family: 'DM Mono', monospace; font-size: 10px; fill: #ede3cc; letter-spacing: 0.08em; }
+      .conn-label { font-family: 'DM Mono', monospace; font-size: 9px;  fill: #8fa4bc; letter-spacing: 0.1em; }
+      .note-label { font-family: 'DM Mono', monospace; font-size: 8px;  fill: #7a5e2a; letter-spacing: 0.08em; }
+    </style>
+    <!-- Arrow marker -->
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#c9a45a" opacity="0.7"/>
+    </marker>
+    <marker id="arrow-dim" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#8fa4bc" opacity="0.6"/>
+    </marker>
+  </defs>
+
+  <!-- ── Background ── -->
+  <rect width="1200" height="780" fill="#06101c"/>
+  <rect x="10" y="10" width="1180" height="760" fill="none" stroke="#c9a45a" stroke-width="1" opacity="0.25"/>
+  <rect x="16" y="16" width="1168" height="748" fill="none" stroke="#c9a45a" stroke-width="0.5" opacity="0.1"/>
+
+  <!-- Corner ornaments -->
+  <g opacity="0.4">
+    <line x1="10" y1="30" x2="30" y2="10" stroke="#c9a45a" stroke-width="1"/>
+    <rect x="10" y="10" width="6" height="6" fill="#c9a45a"/>
+  </g>
+  <g opacity="0.4">
+    <line x1="1190" y1="30" x2="1170" y2="10" stroke="#c9a45a" stroke-width="1"/>
+    <rect x="1184" y="10" width="6" height="6" fill="#c9a45a"/>
+  </g>
+  <g opacity="0.4">
+    <line x1="10" y1="750" x2="30" y2="770" stroke="#c9a45a" stroke-width="1"/>
+    <rect x="10" y="764" width="6" height="6" fill="#c9a45a"/>
+  </g>
+  <g opacity="0.4">
+    <line x1="1190" y1="750" x2="1170" y2="770" stroke="#c9a45a" stroke-width="1"/>
+    <rect x="1184" y="764" width="6" height="6" fill="#c9a45a"/>
+  </g>
+
+  <!-- ── Document Title ── -->
+  <text x="600" y="44" text-anchor="middle" font-family="'Playfair Display',serif" font-size="18" font-weight="700" fill="#e8c97a" letter-spacing="0.1em">THE ENCHANTED LINE — SOFTWARE ARCHITECTURE</text>
+  <line x1="200" y1="52" x2="560" y2="52" stroke="#c9a45a" stroke-width="0.8" opacity="0.5"/>
+  <rect x="594" y="48" width="12" height="12" fill="#c9a45a" transform="rotate(45 600 54)" opacity="0.8"/>
+  <line x1="640" y1="52" x2="1000" y2="52" stroke="#c9a45a" stroke-width="0.8" opacity="0.5"/>
+
+  <!-- ═══════════════════════════════════════════════════
+       TIER 1 — PRESENTATION
+  ═══════════════════════════════════════════════════ -->
+
+  <!-- Tier container -->
+  <rect x="340" y="68" width="260" height="330" rx="2" fill="#0c1e35" stroke="#c9a45a" stroke-width="1" opacity="0.9"/>
+  <rect x="344" y="72" width="252" height="322" rx="1" fill="none" stroke="#c9a45a" stroke-width="0.4" opacity="0.3"/>
+
+  <!-- Tier label -->
+  <text x="470" y="88" text-anchor="middle" class="tier-label">Presentation Tier</text>
+  <line x1="360" y1="94" x2="440" y2="94" stroke="#c9a45a" stroke-width="0.6" opacity="0.4"/>
+  <rect x="464" y="90" width="8" height="8" fill="#c9a45a" transform="rotate(45 468 94)" opacity="0.6"/>
+  <line x1="496" y1="94" x2="576" y2="94" stroke="#c9a45a" stroke-width="0.6" opacity="0.4"/>
+
+  <!-- Box helper macro — replicated as individual rects -->
+  <!-- React SPA + PWA -->
+  <rect x="370" y="104" width="200" height="30" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.9"/>
+  <text x="470" y="123" text-anchor="middle" class="box-label">React SPA + PWA</text>
+
+  <!-- Google Maps JS API -->
+  <rect x="370" y="144" width="200" height="30" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="470" y="163" text-anchor="middle" class="box-label">Google Maps JS API</text>
+  <text x="370" y="178" class="note-label">  (future enhancement)</text>
+
+  <!-- Weather Widget -->
+  <rect x="370" y="188" width="200" height="30" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="470" y="207" text-anchor="middle" class="box-label">Weather Widget</text>
+  <text x="370" y="222" class="note-label">  (future enhancement)</text>
+
+  <!-- Quiz Engine -->
+  <rect x="370" y="232" width="200" height="30" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="470" y="251" text-anchor="middle" class="box-label">Quiz Engine</text>
+  <text x="370" y="266" class="note-label">  (future enhancement)</text>
+
+  <!-- Localisation (i18next) -->
+  <rect x="370" y="276" width="200" height="30" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.9"/>
+  <text x="470" y="295" text-anchor="middle" class="box-label">Localisation (i18next)</text>
+
+  <!-- IndexedDB / Cache API -->
+  <rect x="370" y="316" width="200" height="30" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.9"/>
+  <text x="470" y="335" text-anchor="middle" class="box-label">IndexedDB / Cache API</text>
+
+  <!-- Current state badge -->
+  <rect x="370" y="358" width="200" height="24" rx="1" fill="rgba(201,164,90,0.08)" stroke="#c9a45a" stroke-width="0.5" stroke-dasharray="3 3"/>
+  <text x="470" y="374" text-anchor="middle" font-family="'DM Mono',monospace" font-size="8" fill="#c9a45a" letter-spacing="0.1em">◆ CURRENTLY IMPLEMENTED ◆</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       TIER 2 — EXTERNAL SERVICES
+  ═══════════════════════════════════════════════════ -->
+
+  <rect x="50" y="450" width="280" height="80" rx="2" fill="#0c1e35" stroke="#c9a45a" stroke-width="1" opacity="0.85"/>
+  <rect x="54" y="454" width="272" height="72" rx="1" fill="none" stroke="#c9a45a" stroke-width="0.4" opacity="0.3"/>
+  <text x="190" y="468" text-anchor="middle" class="tier-label">External Services</text>
+
+  <!-- Google Maps Platform -->
+  <rect x="62" y="476" width="118" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.7"/>
+  <text x="121" y="494" text-anchor="middle" class="box-label">Google Maps Platform</text>
+
+  <!-- Google Weather API -->
+  <rect x="192" y="476" width="122" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.7"/>
+  <text x="253" y="494" text-anchor="middle" class="box-label">Google Weather API</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       TIER 3 — APPLICATION (Supabase)
+  ═══════════════════════════════════════════════════ -->
+
+  <rect x="400" y="450" width="750" height="90" rx="2" fill="#0c1e35" stroke="#c9a45a" stroke-width="1" opacity="0.85"/>
+  <rect x="404" y="454" width="742" height="82" rx="1" fill="none" stroke="#c9a45a" stroke-width="0.4" opacity="0.3"/>
+  <text x="775" y="468" text-anchor="middle" class="tier-label">Application Tier</text>
+
+  <!-- Supabase Platform -->
+  <rect x="412" y="476" width="110" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.9"/>
+  <text x="467" y="494" text-anchor="middle" class="box-label">Supabase Platform</text>
+
+  <!-- Auth (JWT) -->
+  <rect x="532" y="476" width="90" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="577" y="494" text-anchor="middle" class="box-label">Auth (JWT)</text>
+
+  <!-- PostgREST API -->
+  <rect x="632" y="476" width="100" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.9"/>
+  <text x="682" y="494" text-anchor="middle" class="box-label">PostgREST API</text>
+
+  <!-- Realtime Subscriptions -->
+  <rect x="742" y="476" width="138" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="811" y="494" text-anchor="middle" class="box-label">Realtime Subscriptions</text>
+
+  <!-- Storage (Media) -->
+  <rect x="890" y="476" width="108" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="944" y="494" text-anchor="middle" class="box-label">Storage (Media)</text>
+
+  <!-- Edge Functions -->
+  <rect x="1008" y="476" width="108" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.7"/>
+  <text x="1062" y="494" text-anchor="middle" class="box-label">Edge Functions</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       TIER 4 — DATA
+  ═══════════════════════════════════════════════════ -->
+
+  <rect x="400" y="600" width="750" height="90" rx="2" fill="#0c1e35" stroke="#c9a45a" stroke-width="1" opacity="0.85"/>
+  <rect x="404" y="604" width="742" height="82" rx="1" fill="none" stroke="#c9a45a" stroke-width="0.4" opacity="0.3"/>
+  <text x="775" y="618" text-anchor="middle" class="tier-label">Data Tier</text>
+
+  <!-- PostgreSQL + PostGIS -->
+  <rect x="412" y="626" width="130" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8" opacity="0.9"/>
+  <text x="477" y="644" text-anchor="middle" class="box-label">PostgreSQL + PostGIS</text>
+
+  <!-- routes table -->
+  <rect x="552" y="626" width="88" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.8"/>
+  <text x="596" y="644" text-anchor="middle" class="box-label">routes table</text>
+
+  <!-- stations table -->
+  <rect x="650" y="626" width="96" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.8"/>
+  <text x="698" y="644" text-anchor="middle" class="box-label">stations table</text>
+
+  <!-- chapters table -->
+  <rect x="756" y="626" width="96" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.8"/>
+  <text x="804" y="644" text-anchor="middle" class="box-label">chapters table</text>
+
+  <!-- hidden_gems table -->
+  <rect x="862" y="626" width="108" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.8"/>
+  <text x="916" y="644" text-anchor="middle" class="box-label">hidden_gems table</text>
+
+  <!-- quizzes table -->
+  <rect x="980" y="626" width="88" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.7"/>
+  <text x="1024" y="644" text-anchor="middle" class="box-label">quizzes table</text>
+
+  <!-- user_progress table -->
+  <rect x="1078" y="626" width="62" height="28" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.7" opacity="0.7"/>
+  <text x="1109" y="638" text-anchor="middle" class="box-label" font-size="9">user_progress</text>
+  <text x="1109" y="650" text-anchor="middle" class="box-label" font-size="9">table</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       CONNECTORS
+  ═══════════════════════════════════════════════════ -->
+
+  <!-- Presentation → External Services (REST) -->
+  <line x1="370" y1="400" x2="190" y2="450" stroke="#8fa4bc" stroke-width="1" stroke-dasharray="4 3" opacity="0.6" marker-end="url(#arrow-dim)"/>
+  <text x="240" y="428" class="conn-label">REST</text>
+
+  <!-- Presentation → Application Tier (REST proxied) -->
+  <line x1="470" y1="400" x2="500" y2="450" stroke="#c9a45a" stroke-width="1.2" opacity="0.7" marker-end="url(#arrow)"/>
+  <text x="452" y="432" class="conn-label">REST (proxied)</text>
+
+  <!-- Presentation → Application Tier (HTTPS / WebSocket) -->
+  <line x1="570" y1="400" x2="720" y2="450" stroke="#c9a45a" stroke-width="1.2" opacity="0.7" marker-end="url(#arrow)"/>
+  <text x="600" y="432" class="conn-label">HTTPS / WebSocket</text>
+
+  <!-- Application → Data (SQL) -->
+  <line x1="775" y1="540" x2="775" y2="600" stroke="#c9a45a" stroke-width="1.4" opacity="0.8" marker-end="url(#arrow)"/>
+  <text x="780" y="574" class="conn-label">SQL</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       LEGEND
+  ═══════════════════════════════════════════════════ -->
+
+  <rect x="50" y="600" width="300" height="110" rx="2" fill="#0c1e35" stroke="#c9a45a" stroke-width="0.8" opacity="0.85"/>
+  <text x="200" y="618" text-anchor="middle" class="tier-label">Legend</text>
+
+  <!-- Implemented -->
+  <rect x="66" y="628" width="50" height="16" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.8"/>
+  <text x="124" y="640" class="conn-label">Currently implemented</text>
+
+  <!-- Future -->
+  <rect x="66" y="652" width="50" height="16" rx="1" fill="#112540" stroke="#c9a45a" stroke-width="0.6" opacity="0.6"/>
+  <text x="124" y="664" class="conn-label">Planned / future enhancement</text>
+
+  <!-- REST arrow -->
+  <line x1="66" y1="682" x2="116" y2="682" stroke="#c9a45a" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <text x="124" y="686" class="conn-label">HTTPS / REST / WebSocket</text>
+
+  <!-- SQL arrow -->
+  <line x1="66" y1="700" x2="116" y2="700" stroke="#8fa4bc" stroke-width="1" stroke-dasharray="4 3" opacity="0.6" marker-end="url(#arrow-dim)"/>
+  <text x="124" y="704" class="conn-label">External / optional connection</text>
+
+  <!-- ═══════════════════════════════════════════════════
+       STACK BADGE (bottom right)
+  ═══════════════════════════════════════════════════ -->
+  <text x="1150" y="756" text-anchor="end" font-family="'DM Mono',monospace" font-size="8" fill="#4a6080" letter-spacing="0.1em">React · Vite · Tailwind CSS v4 · TypeScript · Supabase</text>
+</svg>
