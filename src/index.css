@@ -1,0 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Libre+Franklin:wght@300;400;500;600&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Libre Franklin', system-ui, sans-serif;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+
+  --color-rail-void: #06101c;
+  --color-rail-deep: #09141f;
+  --color-rail-land: #0c1e35;
+  --color-rail-surface: #112540;
+  --color-rail-gold: #c9a45a;
+  --color-rail-gold-bright: #e8c97a;
+  --color-rail-gold-dim: #7a5e2a;
+  --color-rail-cream: #ede3cc;
+  --color-rail-muted: #8fa4bc;
+  --color-rail-rust: #7a2e1a;
+  --color-rail-sage: #3a6040;
+  --color-rail-purple: #4a3060;
+}
+
+@keyframes ticketDrop {
+  0% { opacity: 0; transform: translateY(-32px) rotate(-2deg); }
+  60% { transform: translateY(4px) rotate(0.5deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity: 0.6; r: 12; }
+  50% { opacity: 1; r: 18; }
+}
+
+@keyframes trainSmoke {
+  0% { opacity: 0.5; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-8px) scale(1.8); }
+}
+
+@keyframes routeDraw {
+  from { stroke-dashoffset: 2000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes awakenStation {
+  0% { opacity: 0; transform: scale(0.4); }
+  70% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes chapterSlideIn {
+  from { opacity: 0; transform: translateX(32px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes stampIn {
+  0% { opacity: 0; transform: scale(1.6) rotate(-15deg); }
+  60% { transform: scale(0.9) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@keyframes shimmerGem {
+  0%, 100% { transform: scale(1) rotate(45deg); }
+  50% { transform: scale(1.3) rotate(45deg); }
+}
+
+@keyframes introFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { display: none; }
