@@ -13,7 +13,8 @@
  *   JourneyView manages train position via requestAnimationFrame animation
  */
 
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { APIProvider, AdvancedMarker, Map, Pin, Polyline } from '@vis.gl/react-google-maps'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -31,6 +32,8 @@ interface Station {
   num: string              // Roman numeral chapter number (I–IX)
   x: number                // SVG x coordinate on the map (viewBox 0–870)
   y: number                // SVG y coordinate on the map (viewBox 0–660)
+  lat: number              // Geographic latitude for Google Maps
+  lng: number              // Geographic longitude for Google Maps
   heritage: string         // Long-form heritage paragraph shown in ChapterPanel
   gems: string[]           // Three "hidden gem" bullet points for the station
   names: Record<Language, string>  // Localised station names
@@ -45,7 +48,7 @@ interface Station {
  */
 const STATIONS: Station[] = [
   {
-    id: 'pretoria', name: 'Pretoria', subtitle: 'Jacaranda City', num: 'I', x: 620, y: 180,
+    id: 'pretoria', name: 'Pretoria', subtitle: 'Jacaranda City', num: 'I', x: 620, y: 180, lat: -25.7479, lng: 28.2293,
     terrain: 'highveld',
     heritage: "Founded in 1855, Pretoria is South Africa's administrative capital. Each October, over 70,000 jacaranda trees transform the city into a purple dreamscape — a spectacle so beloved it has become the city's defining identity. The Union Buildings, seat of government, survey it all from a ridge above the city.",
     gems: [
@@ -56,7 +59,7 @@ const STATIONS: Station[] = [
     names: { en: 'Pretoria', zu: 'ePitoli', af: 'Pretoria', st: 'Pitori' }
   },
   {
-    id: 'johannesburg', name: 'Johannesburg', subtitle: 'City of Gold', num: 'II', x: 596, y: 220,
+    id: 'johannesburg', name: 'Johannesburg', subtitle: 'City of Gold', num: 'II', x: 596, y: 220, lat: -26.2041, lng: 28.0473,
     terrain: 'highveld',
     heritage: "Born from the 1886 gold rush on the Witwatersrand, Johannesburg rose from a surveyor's tent city to a metropolis of five million in barely a century — the fastest-growing city in recorded history at its founding. eGoli, place of gold, it was named with earned pride.",
     gems: [
@@ -67,7 +70,7 @@ const STATIONS: Station[] = [
     names: { en: 'Johannesburg', zu: 'eGoli', af: 'Johannesburg', st: 'Johanesboko' }
   },
   {
-    id: 'klerksdorp', name: 'Klerksdorp', subtitle: 'Ancient Spheres', num: 'III', x: 532, y: 290,
+    id: 'klerksdorp', name: 'Klerksdorp', subtitle: 'Ancient Spheres', num: 'III', x: 532, y: 290, lat: -26.8521, lng: 26.6667,
     terrain: 'highveld',
     heritage: "One of South Africa's oldest European settlements, Klerksdorp sits at the edge of the Highveld. Nearby farms have yielded the Klerksdorp spheres — 2.8-billion-year-old grooved metallic objects that predate complex life on Earth. Their origin remains one of geology's most intriguing mysteries.",
     gems: [
@@ -78,7 +81,7 @@ const STATIONS: Station[] = [
     names: { en: 'Klerksdorp', zu: 'Klerksdorp', af: 'Klerksdorp', st: 'Klerksdorp' }
   },
   {
-    id: 'kimberley', name: 'Kimberley', subtitle: 'Diamond Capital', num: 'IV', x: 428, y: 358,
+    id: 'kimberley', name: 'Kimberley', subtitle: 'Diamond Capital', num: 'IV', x: 428, y: 358, lat: -28.7282, lng: 24.7499,
     terrain: 'karoo',
     heritage: "The Big Hole is the largest hand-dug excavation on Earth — 97 metres deep and 463 metres wide, carved by 50,000 miners between 1871 and 1914. From this pit came 2,722 kilograms of diamonds that rewrote South Africa's destiny and lured the ambitions of empire.",
     gems: [
@@ -89,7 +92,7 @@ const STATIONS: Station[] = [
     names: { en: 'Kimberley', zu: 'eKimberley', af: 'Kimberley', st: 'Kimbele' }
   },
   {
-    id: 'de_aar', name: 'De Aar', subtitle: 'Heart of the Rails', num: 'V', x: 382, y: 432,
+    id: 'de_aar', name: 'De Aar', subtitle: 'Heart of the Rails', num: 'V', x: 382, y: 432, lat: -30.6490, lng: 24.0123,
     terrain: 'karoo',
     heritage: '"The Vein" — De Aar\'s Dutch name describes exactly what it is: the pulsing artery through which South Africa\'s rail network converges. At its steam-age peak, De Aar operated one of the largest locomotive workshops in the Southern Hemisphere — a cathedral of grease, iron, and ambition.',
     gems: [
@@ -100,7 +103,7 @@ const STATIONS: Station[] = [
     names: { en: 'De Aar', zu: 'De Aar', af: 'De Aar', st: 'De Aar' }
   },
   {
-    id: 'beaufort_west', name: 'Beaufort West', subtitle: 'Karoo Gateway', num: 'VI', x: 298, y: 496,
+    id: 'beaufort_west', name: 'Beaufort West', subtitle: 'Karoo Gateway', num: 'VI', x: 298, y: 496, lat: -32.3567, lng: 22.5830,
     terrain: 'karoo',
     heritage: "The oldest town in the Great Karoo, Beaufort West is the birthplace of Christiaan Barnard, who performed the world's first successful heart transplant in 1967. The Karoo National Park begins at the town's doorstep — a prehistoric landscape of fossils, flat-topped koppies, and geological time made visible.",
     gems: [
@@ -111,7 +114,7 @@ const STATIONS: Station[] = [
     names: { en: 'Beaufort West', zu: 'Beaufort West', af: 'Beaufort-Wes', st: 'Beaufort-Wes' }
   },
   {
-    id: 'matjiesfontein', name: 'Matjiesfontein', subtitle: 'Frozen in Time', num: 'VII', x: 210, y: 534,
+    id: 'matjiesfontein', name: 'Matjiesfontein', subtitle: 'Frozen in Time', num: 'VII', x: 210, y: 534, lat: -33.2307, lng: 20.5830,
     terrain: 'karoo',
     heritage: "South Africa's most perfectly preserved Victorian village — a National Monument where time stopped in 1884. Founded by Scottish immigrant James Douglas Logan, every original building stands. A single red London double-decker bus serves as the town taxi. The Lord Milner Hotel has operated unchanged for 140 years.",
     gems: [
@@ -122,7 +125,7 @@ const STATIONS: Station[] = [
     names: { en: 'Matjiesfontein', zu: 'Matjiesfontein', af: 'Matjiesfontein', st: 'Matjiesfontein' }
   },
   {
-    id: 'worcester', name: 'Worcester', subtitle: 'Valley of Vineyards', num: 'VIII', x: 152, y: 554,
+    id: 'worcester', name: 'Worcester', subtitle: 'Valley of Vineyards', num: 'VIII', x: 152, y: 554, lat: -33.6465, lng: 19.4485,
     terrain: 'winelands',
     heritage: "Worcester presides over the Breede River Valley, cradled by the Hex River Mountains whose peaks carry snow each winter. South Africa's largest wine grape producing valley, the region blends pastoral grandeur with a living Cape Colony tradition that stretches back to the earliest settlers.",
     gems: [
@@ -133,7 +136,7 @@ const STATIONS: Station[] = [
     names: { en: 'Worcester', zu: 'Worcester', af: 'Worcester', st: 'Worcester' }
   },
   {
-    id: 'cape_town', name: 'Cape Town', subtitle: 'Mother City', num: 'IX', x: 104, y: 566,
+    id: 'cape_town', name: 'Cape Town', subtitle: 'Mother City', num: 'IX', x: 104, y: 566, lat: -33.9249, lng: 18.4241,
     terrain: 'cape',
     heritage: "Founded by the Dutch East India Company in 1652, Cape Town is Africa's oldest colonial city. Table Mountain — one of the Seven Natural Wonders of the World — watches over a city of extraordinary diversity and resilience. Your journey ends here. The story of the Cape is only beginning.",
     gems: [
@@ -161,12 +164,10 @@ const CONDUCTOR_GREETING: Record<Language, string> = {
   st: 'Dumelang, baeti. Motsamaisi wa hao o bua Sesotho.',
 }
 
-// ─── SVG Map Constants ────────────────────────────────────────────────────────
+// ─── Google Map Constants ────────────────────────────────────────────────────────
 
 /**
- * Simplified art-deco polygon outlining South Africa's border.
- * Used both as the filled landmass and as a clip path for terrain overlays.
- * Coordinates are in the SVG viewBox space (0 0 870 660).
+ * SVG polygon points for the South Africa outline used in the map background.
  */
 const SA_POLY_POINTS =
   '90,50 500,45 800,48 858,162 858,285 838,358 818,425 776,472 726,510 682,542 636,560 586,570 528,576 472,578 414,574 388,577 328,558 278,546 230,540 188,548 148,552 118,562 96,548 75,508 55,428 38,340 18,295 42,210 90,50'
@@ -216,17 +217,9 @@ export default function App() {
   // Ref keeps stIdx readable inside the rAF callback without recreating the loop
   const stIdxRef = useRef(stIdx)
   useEffect(() => { stIdxRef.current = stIdx }, [stIdx])
-
-  /**
-   * Compute the train's current SVG position by linearly interpolating
-   * between the current station and the next one using tProg.
-   * Memoised so it only recalculates when stIdx or tProg change.
-   */
-  const trainPos = useMemo(() => {
-    const a = STATIONS[stIdx]
-    const b = STATIONS[Math.min(stIdx + 1, STATIONS.length - 1)]
-    return { x: a.x + (b.x - a.x) * tProg, y: a.y + (b.y - a.y) * tProg }
-  }, [stIdx, tProg])
+  const progressRef = useRef(tProg)
+  const movingRef = useRef(isMoving)
+  useEffect(() => { movingRef.current = isMoving }, [isMoving])
 
   /**
    * Animation loop — runs while isMoving is true.
@@ -238,28 +231,30 @@ export default function App() {
    */
   useEffect(() => {
     if (!isMoving) return
-    const speed = 0.0028  // Fraction of the segment completed per frame (~60 fps → ~6 s per segment)
+    const speed = 1 / 420  // Fraction of the segment completed per frame (~60 fps -> ~7 s per segment)
     let raf: number
     const tick = () => {
-      setTProg(prev => {
-        const next = prev + speed
-        if (next >= 1) {
-          setIsMoving(false)
-          const nextIdx = stIdxRef.current + 1
-          if (nextIdx < STATIONS.length) {
-            setStIdx(nextIdx)
-            setTProg(0)
-            setCompleted(c => new Set([...c, STATIONS[stIdxRef.current].id]))
-            setAwoken(a => new Set([...a, STATIONS[nextIdx].id]))
-            setActiveStation(STATIONS[nextIdx])
-            setNewlyAwoken(STATIONS[nextIdx].id)
-            setTimeout(() => setNewlyAwoken(null), 1500)
-          }
-          return 0
+      if (!movingRef.current) return
+      const next = progressRef.current + speed
+      if (next >= 1) {
+        movingRef.current = false
+        progressRef.current = 0
+        setTProg(0)
+        setIsMoving(false)
+        const nextIdx = stIdxRef.current + 1
+        if (nextIdx < STATIONS.length) {
+          setStIdx(nextIdx)
+          setCompleted(c => new Set([...c, STATIONS[stIdxRef.current].id]))
+          setAwoken(a => new Set([...a, STATIONS[nextIdx].id]))
+          setActiveStation(STATIONS[nextIdx])
+          setNewlyAwoken(STATIONS[nextIdx].id)
+          setTimeout(() => setNewlyAwoken(null), 1500)
         }
-        raf = requestAnimationFrame(tick)
-        return next
-      })
+        return
+      }
+      progressRef.current = next
+      setTProg(next)
+      raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     // Cleanup: cancel any pending rAF if the effect re-runs before animation ends
@@ -268,13 +263,14 @@ export default function App() {
 
   /**
    * Triggered by the "Depart" / "Continue Journey" buttons.
-   * Clears the active chapter panel and starts the animation loop.
+   * A leg can only start while the train is stationary, so each station is
+   * visited in order and the arrival panel remains open for reading.
    */
   const handleContinue = useCallback(() => {
-    if (stIdx >= STATIONS.length - 1) return  // Already at the final station
+    if (isMoving || stIdx >= STATIONS.length - 1) return
     setActiveStation(null)
     setIsMoving(true)
-  }, [stIdx])
+  }, [isMoving, stIdx])
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -293,7 +289,6 @@ export default function App() {
       lang={lang}
       stIdx={stIdx}
       tProg={tProg}
-      trainPos={trainPos}
       awoken={awoken}
       completed={completed}
       activeStation={activeStation}
@@ -588,14 +583,13 @@ function IntroScreen({
  * The "Depart" button is shown at the bottom of the map when stationary.
  */
 function JourneyView({
-  lang, stIdx, tProg, trainPos, awoken, completed,
+  lang, stIdx, tProg, awoken, completed,
   activeStation, newlyAwoken, isMoving,
   onStationClick, onCloseChapter, onContinue,
 }: {
   lang: Language
   stIdx: number
   tProg: number
-  trainPos: { x: number; y: number }
   awoken: Set<string>
   completed: Set<string>
   activeStation: Station | null
@@ -677,12 +671,11 @@ function JourneyView({
 
         {/* Map area — fills all available horizontal space left of ChapterPanel */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          <MapSVG
+          <GoogleMapView
             stIdx={stIdx}
-            trainPos={trainPos}
+            tProg={tProg}
             awoken={awoken}
             completed={completed}
-            newlyAwoken={newlyAwoken}
             lang={lang}
             onStationClick={onStationClick}
           />
@@ -792,7 +785,84 @@ function JourneyView({
   )
 }
 
-// ─── Map SVG ─────────────────────────────────────────────────────────────────
+// ─── Google Map ───────────────────────────────────────────────────────────────
+
+function GoogleMapView({
+  stIdx, tProg, awoken, completed, lang, onStationClick,
+}: {
+  stIdx: number
+  tProg: number
+  awoken: Set<string>
+  completed: Set<string>
+  lang: Language
+  onStationClick: (s: Station) => void
+}) {
+  const current = STATIONS[stIdx]
+  const next = STATIONS[Math.min(stIdx + 1, STATIONS.length - 1)]
+  const trainPosition = {
+    lat: current.lat + (next.lat - current.lat) * tProg,
+    lng: current.lng + (next.lng - current.lng) * tProg,
+  }
+  const route = STATIONS.map(station => ({ lat: station.lat, lng: station.lng }))
+  const travelledRoute = [
+    ...STATIONS.slice(0, stIdx + 1).map(station => ({ lat: station.lat, lng: station.lng })),
+    ...(stIdx < STATIONS.length - 1 ? [trainPosition] : []),
+  ]
+
+  return (
+    <APIProvider apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? ''}>
+      <Map
+        defaultCenter={{ lat: -30.5, lng: 24.5 }}
+        defaultZoom={6}
+        mapId="DEMO_MAP_ID"
+        mapTypeId="terrain"
+        gestureHandling="greedy"
+        disableDefaultUI={false}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <Polyline
+          path={route}
+          strokeColor="#c9a45a"
+          strokeOpacity={0.35}
+          strokeWeight={3}
+        />
+        <Polyline
+          path={travelledRoute}
+          strokeColor="#e8c97a"
+          strokeOpacity={0.95}
+          strokeWeight={5}
+        />
+
+        {STATIONS.map(station => {
+          const isAwoken = awoken.has(station.id)
+          const isComplete = completed.has(station.id)
+          return (
+            <AdvancedMarker
+              key={station.id}
+              position={{ lat: station.lat, lng: station.lng }}
+              title={station.names[lang]}
+              clickable={isAwoken}
+              onClick={() => isAwoken && onStationClick(station)}
+            >
+              <Pin
+                background={isComplete ? '#c9a45a' : isAwoken ? '#e8c97a' : '#1a3050'}
+                borderColor="#06101c"
+                glyphColor="#06101c"
+                glyph={station.num}
+              />
+            </AdvancedMarker>
+          )
+        })}
+
+        <AdvancedMarker position={trainPosition} title="Train">
+          <Pin background="#7a2e1a" borderColor="#e8c97a" glyphColor="#e8c97a" glyph="T" />
+        </AdvancedMarker>
+      </Map>
+    </APIProvider>
+  )
+}
+
+// ─── Legacy SVG Map ──────────────────────────────────────────────────────────
 
 /**
  * MapSVG — the interactive SVG map of South Africa.
@@ -1036,6 +1106,8 @@ function MapSVG({
     </svg>
   )
 }
+
+void MapSVG
 
 // ─── Train Sprite ─────────────────────────────────────────────────────────────
 
