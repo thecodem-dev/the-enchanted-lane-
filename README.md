@@ -166,6 +166,41 @@ server {
 
 ---
 
+## Architecture
+
+The application is structured as a four-tier architecture. The Presentation Tier is fully implemented today; the remaining tiers outline the planned full-stack evolution.
+
+![Software Architecture Diagram](./docs/architecture.svg)
+
+```
+┌─────────────────────────────┐
+│      Presentation Tier      │  ← Fully implemented (React SPA)
+└──────────────┬──────────────┘
+               │ REST / HTTPS / WebSocket
+     ┌─────────┴──────────────────────────┐
+     │                                    │
+┌────▼──────────┐        ┌───────────────▼──────────────┐
+│ External      │        │      Application Tier         │
+│ Services      │        │      (Supabase Platform)      │
+└───────────────┘        └───────────────┬──────────────┘
+                                         │ SQL
+                         ┌───────────────▼──────────────┐
+                         │         Data Tier             │
+                         │  (PostgreSQL + PostGIS)       │
+                         └──────────────────────────────┘
+```
+
+| Tier | Technology | Status |
+|---|---|---|
+| Presentation | React 19, Vite 8, Tailwind CSS v4, TypeScript | ✅ Implemented |
+| External Services | Google Maps Platform, Google Weather API | 🔲 Planned |
+| Application | Supabase (Auth, PostgREST, Realtime, Storage, Edge Functions) | 🔲 Planned |
+| Data | PostgreSQL + PostGIS (routes, stations, chapters, hidden_gems, user_progress) | 🔲 Planned |
+
+For the full architecture breakdown including schema design, data flow, and technology decisions see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+
+---
+
 ## Project Structure
 
 ```
