@@ -1,25 +1,51 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    // Target modern browsers — aligns with Vite 8's esbuild target
+    "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    // Module resolution — "bundler" delegates to Vite/Rolldown, no node resolution quirks
     "module": "ESNext",
-    "skipLibCheck": true,
     "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+
+    // Path aliases — must match vite.config.ts resolve.alias
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
+
+    // React JSX — react-jsx avoids the need to import React in every file
     "jsx": "react-jsx",
+
+    // Type sources
     "types": ["node"],
+
+    // Emit — Vite handles transpilation; tsc is type-check only
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    // Strict mode — full suite, industry standard
     "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+
+    // Additional quality checks
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

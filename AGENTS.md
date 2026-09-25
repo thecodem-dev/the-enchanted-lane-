@@ -1,23 +1,53 @@
-# figma-make-app
+# interactive-train-journey-map
 
-React + Vite + Tailwind CSS project running inside Figma Make.
+React + Vite + Tailwind CSS project.
+
+## Setup
+
+```bash
+npm install
+npm run dev
+```
 
 ## Development Server
 
-A Vite development server is **always running** on `$PORT` (default 8443). You don't need to start it manually.
+The Vite dev server runs on port **8443** by default (configurable via the `PORT` env var).
 
-- Preview URL: The user can access the running app through the preview panel
-- Hot reload: Changes to source files are reflected immediately
+- Hot reload is enabled — changes to source files are reflected immediately.
+- When running inside Figma Make, the server is started automatically.
 
 ## Key Files
 
-- `src/App.tsx` - Main application component
-- `src/main.tsx` - React entry point
-- `src/index.css` - Global styles and Tailwind CSS import
-- `package.json` - Dependencies and scripts
-- `vite.config.ts` - Vite configuration
-- `.mise.toml` - Toolchain versions (Node.js, pnpm)
+| Path | Purpose |
+|---|---|
+| `src/App.tsx` | Root component — phase and language state |
+| `src/main.tsx` | React entry point |
+| `src/index.css` | Global styles and Tailwind CSS import |
+| `src/types/index.ts` | Shared TypeScript types |
+| `src/data/stations.ts` | Station data and language constants |
+| `src/hooks/useTrainAnimation.ts` | Animation loop and journey state |
+| `src/components/` | Feature components |
+| `src/components/ui/` | Small reusable UI components |
+| `vite.config.ts` | Vite configuration |
+| `.env.example` | Environment variable reference |
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Vite dev server |
+| `npm run build` | Type-check then build for production |
+| `npm run preview` | Serve the production build locally |
+| `npm run typecheck` | TypeScript type-check only |
 
 ## Styling
 
-This project uses **Tailwind CSS v4** for styling. Use Tailwind utility classes directly in JSX. Tailwind is loaded via the Vite plugin — no PostCSS config needed.
+Uses **Tailwind CSS v4** loaded via the Vite plugin — no PostCSS config needed. Custom design tokens are defined in `src/index.css` under `@theme`.
+
+## Environment Variables
+
+Copy `.env.example` to `.env` and fill in values before running:
+
+```
+VITE_GOOGLE_MAPS_API_KEY=your_key_here
+```
