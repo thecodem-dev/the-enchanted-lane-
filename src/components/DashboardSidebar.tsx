@@ -1,4 +1,4 @@
-import { T, A, D, DISPLAY, SANS, MONO } from '@/styles/tokens'
+import { S, T, A, D, R, DISPLAY, SANS, MONO } from '@/styles/tokens'
 
 export type NavItem = 'map' | 'passport' | 'gems' | 'quiz' | 'rhino' | 'settings'
 
@@ -16,7 +16,7 @@ interface NavEntry {
 }
 
 function SidebarIcon({ id, active }: { id: NavItem; active: boolean }) {
-  const c = active ? A : D
+  const c = active ? R : D
   switch (id) {
     case 'map':
       return (
@@ -99,38 +99,38 @@ export function DashboardSidebar({
   return (
     <div style={{
       width: 216, flexShrink: 0, height: '100%',
-      background: `linear-gradient(180deg, #0F1E3A 0%, #0C1830 100%)`,
-      borderRight: `1px solid rgba(201,168,76,0.18)`,
+      background: S,
+      borderRight: `1px solid rgba(145,112,67,0.23)`,
       display: 'flex', flexDirection: 'column',
-      boxShadow: `inset -1px 0 0 rgba(201,168,76,0.06)`,
+      boxShadow: `inset -1px 0 0 rgba(145,112,67,0.08)`,
     }}>
 
       {/* Brand */}
       <div style={{
         padding: '22px 20px 18px',
-        borderBottom: `1px solid rgba(201,168,76,0.15)`,
+        borderBottom: `1px solid rgba(145,112,67,0.2)`,
         flexShrink: 0,
-        background: `linear-gradient(180deg, rgba(201,168,76,0.06) 0%, transparent 100%)`,
+        background: `linear-gradient(180deg, rgba(145,112,67,0.08) 0%, transparent 100%)`,
       }}>
         {/* Gold rule above brand */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-          <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, rgba(201,168,76,0.5))` }} />
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, rgba(145,112,67,0.65))` }} />
           <svg width="6" height="6" viewBox="0 0 6 6">
-            <rect x="0" y="0" width="6" height="6" fill="#C9A84C" opacity="0.7" transform="rotate(45 3 3)" />
+            <rect x="0" y="0" width="6" height="6" fill={A} opacity="0.8" transform="rotate(45 3 3)" />
           </svg>
-          <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, rgba(201,168,76,0.5))` }} />
+          <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, rgba(145,112,67,0.65))` }} />
         </div>
         <div style={{
           fontFamily: DISPLAY,
-          fontSize: 15, fontWeight: 600,
-          color: T, letterSpacing: '0.06em', marginBottom: 3,
+          fontSize: 24, fontWeight: 400,
+          color: T, lineHeight: 1, marginBottom: 6,
           textAlign: 'center',
         }}>
           The Enchanted Line
         </div>
         <div style={{
-          fontFamily: MONO,
-          fontSize: 9, color: `rgba(201,168,76,0.4)`,
+          fontFamily: MONO, fontWeight: 500,
+          fontSize: 9, color: D, textAlign: 'center',
           letterSpacing: '0.08em', textTransform: 'uppercase',
         }}>
           Journey Companion
@@ -150,15 +150,15 @@ export function DashboardSidebar({
                 width: '100%',
                 display: 'flex', alignItems: 'center', gap: 11,
                 padding: '10px 20px',
-                background: isActive ? `rgba(201,168,76,0.1)` : 'transparent',
+                background: isActive ? `rgba(145,112,67,0.13)` : 'transparent',
                 border: 'none',
-                borderLeft: `2px solid ${isActive ? '#C9A84C' : 'transparent'}`,
+                borderLeft: `2px solid ${isActive ? R : 'transparent'}`,
                 cursor: 'pointer', textAlign: 'left',
                 transition: 'background 0.15s',
-                boxShadow: isActive ? `inset 0 0 20px rgba(201,168,76,0.04)` : 'none',
+                boxShadow: isActive ? `inset 0 0 20px rgba(145,112,67,0.05)` : 'none',
               }}
               onMouseEnter={e => {
-                if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
+                if (!isActive) e.currentTarget.style.background = 'rgba(62,35,24,0.04)'
               }}
               onMouseLeave={e => {
                 if (!isActive) e.currentTarget.style.background = 'transparent'
@@ -175,9 +175,9 @@ export function DashboardSidebar({
               </span>
               {item.badge && (
                 <span style={{
-                  fontFamily: MONO, fontSize: 10,
-                  color: isActive ? A : `rgba(42,74,106,0.8)`,
-                  background: isActive ? `rgba(201,168,76,0.12)` : 'rgba(255,255,255,0.04)',
+                  fontFamily: MONO, fontWeight: 500, fontSize: 10,
+                  color: isActive ? T : D,
+                  background: isActive ? `rgba(145,112,67,0.16)` : 'rgba(62,35,24,0.06)',
                   borderRadius: 2, padding: '1px 5px', lineHeight: 1.6,
                 }}>
                   {item.badge}
@@ -191,12 +191,12 @@ export function DashboardSidebar({
       {/* Footer */}
       <div style={{
         padding: '12px 20px 14px',
-        borderTop: `1px solid rgba(255,255,255,0.04)`,
+        borderTop: `1px solid rgba(62,35,24,0.06)`,
         flexShrink: 0,
       }}>
         <div style={{
-          fontFamily: MONO, fontSize: 9,
-          color: `rgba(42,74,106,0.5)`,
+          fontFamily: MONO, fontWeight: 500, fontSize: 9,
+          color: D,
           letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.7,
         }}>
           Geekulcha 2027<br />Hackathon Entry

@@ -1,5 +1,5 @@
 import { STATION_VIDEOS } from '@/data/videos'
-import { V, S, T, A, D, G, DISPLAY, TEXT_F, MONO } from '@/styles/tokens'
+import { V, S, T, A, D, R, DISPLAY, TEXT_F, MONO } from '@/styles/tokens'
 import type { Station } from '@/types'
 
 export interface VideoModalProps {
@@ -33,7 +33,7 @@ export function VideoModal({
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 400,
-        background: 'rgba(2,5,12,0.88)', backdropFilter: 'blur(8px)',
+        background: 'rgba(62,35,24,0.45)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 24,
       }}
@@ -42,27 +42,27 @@ export function VideoModal({
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 820,
-          background: S, borderRadius: 10,
+          background: V, borderRadius: 10,
           overflow: 'hidden',
-          border: `1px solid rgba(201,168,76,0.25)`,
-          boxShadow: `0 32px 100px rgba(0,0,0,0.8)`,
+          border: `1px solid rgba(145,112,67,0.33)`,
+          boxShadow: `0 32px 100px rgba(62,35,24,0.28)`,
           animation: 'introFadeUp 0.22s ease-out both',
         }}
       >
         {/* Header */}
         <div style={{
           padding: '18px 22px 14px',
-          borderBottom: `1px solid rgba(255,255,255,0.05)`,
+          borderBottom: `1px solid rgba(62,35,24,0.08)`,
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
         }}>
           <div>
             <div style={{
-              fontFamily: MONO, fontSize: 9, letterSpacing: '0.18em',
-              color: `rgba(201,168,76,0.5)`, textTransform: 'uppercase', marginBottom: 5,
+              fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.18em',
+              color: R, textTransform: 'uppercase', marginBottom: 5,
             }}>
               Chapter {station.num} · {station.terrain}
             </div>
-            <div style={{ fontFamily: DISPLAY, fontSize: 22, fontWeight: 700, color: T, lineHeight: 1.15 }}>
+            <div style={{ fontFamily: DISPLAY, fontSize: 32, fontWeight: 400, color: T, lineHeight: 1 }}>
               {vid?.title ?? station.names.en}
             </div>
             <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 14, color: D, marginTop: 3 }}>
@@ -73,7 +73,7 @@ export function VideoModal({
             onClick={onClose}
             aria-label="Close video"
             style={{
-              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)',
+              background: 'rgba(62,35,24,0.08)', border: '1px solid rgba(62,35,24,0.14)',
               borderRadius: '50%', width: 36, height: 36, cursor: 'pointer',
               color: D, fontSize: 20,
               display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -84,7 +84,7 @@ export function VideoModal({
         </div>
 
         {/* Video embed */}
-        <div style={{ position: 'relative', paddingBottom: '52%', background: V }}>
+        <div style={{ position: 'relative', paddingBottom: '52%', background: S }}>
           {vid ? (
             <iframe
               src={`https://www.youtube.com/embed/${vid.videoId}?autoplay=1&rel=0&modestbranding=1&color=white`}
@@ -103,10 +103,10 @@ export function VideoModal({
                 <circle cx="24" cy="24" r="22" stroke={A} strokeWidth="1.5" fill="none" />
                 <polygon points="19,16 35,24 19,32" fill={A} />
               </svg>
-              <div style={{ fontFamily: DISPLAY, fontSize: 16, color: `rgba(230,217,184,0.3)` }}>
+              <div style={{ fontFamily: TEXT_F, fontSize: 15, fontWeight: 500, color: `rgba(62,35,24,0.6)` }}>
                 Video coming soon
               </div>
-              <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 13, color: `rgba(42,74,106,0.5)` }}>
+              <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 13, color: D }}>
                 Add a YouTube ID to STATION_VIDEOS['{station.id}'] in src/data/videos.ts
               </div>
             </div>
@@ -120,25 +120,25 @@ export function VideoModal({
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em',
-              color: `rgba(201,168,76,0.45)`, textTransform: 'uppercase', marginBottom: 6,
+              fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.14em',
+              color: R, textTransform: 'uppercase', marginBottom: 6,
             }}>
               About this stop
             </div>
-            <p style={{ fontFamily: TEXT_F, fontSize: 14, color: `rgba(230,217,184,0.72)`, margin: 0, lineHeight: 1.65 }}>
+            <p style={{ fontFamily: TEXT_F, fontSize: 14, color: `rgba(62,35,24,0.72)`, margin: 0, lineHeight: 1.65 }}>
               {station.heritage.slice(0, 220)}…
             </p>
           </div>
           <div style={{ width: 160, flexShrink: 0 }}>
             <div style={{
-              fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em',
-              color: `rgba(201,168,76,0.45)`, textTransform: 'uppercase', marginBottom: 6,
+              fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.14em',
+              color: R, textTransform: 'uppercase', marginBottom: 6,
             }}>
               Gems nearby
             </div>
             {station.gems.slice(0, 2).map((gem, i) => (
               <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 6, alignItems: 'flex-start' }}>
-                <span style={{ color: G, flexShrink: 0, fontSize: 9, marginTop: 3 }}>◆</span>
+                <span style={{ color: A, flexShrink: 0, fontSize: 9, marginTop: 3 }}>◆</span>
                 <span style={{ fontFamily: TEXT_F, fontSize: 12, color: D, lineHeight: 1.4 }}>
                   {gem.split(' — ')[0]}
                 </span>
@@ -158,9 +158,9 @@ export function VideoModal({
             aria-label="Previous station"
             style={{
               background: 'transparent',
-              border: `1px solid rgba(42,74,106,0.28)`,
+              border: `1px solid rgba(166,169,154,0.56)`,
               borderRadius: 6, padding: '8px 16px', cursor: hasPrev ? 'pointer' : 'default',
-              fontFamily: MONO, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
+              fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
               color: D, opacity: hasPrev ? 1 : 0.35,
             }}
           >
@@ -170,10 +170,10 @@ export function VideoModal({
             onClick={onClose}
             style={{
               background: 'transparent',
-              border: `1px solid rgba(201,168,76,0.28)`,
+              border: `1px solid rgba(145,112,67,0.36)`,
               borderRadius: 6, padding: '8px 18px', cursor: 'pointer',
-              fontFamily: MONO, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: A,
+              fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
+              color: R,
             }}
           >
             Back to map
@@ -184,9 +184,9 @@ export function VideoModal({
             aria-label="Next station"
             style={{
               background: 'transparent',
-              border: `1px solid rgba(42,74,106,0.28)`,
+              border: `1px solid rgba(166,169,154,0.56)`,
               borderRadius: 6, padding: '8px 16px', cursor: hasNext ? 'pointer' : 'default',
-              fontFamily: MONO, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
+              fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase',
               color: D, opacity: hasNext ? 1 : 0.35,
             }}
           >

@@ -1,4 +1,4 @@
-import { A, D, V } from '@/styles/tokens'
+import { A, D, V, MONO } from '@/styles/tokens'
 
 interface CompassRoseProps {
   x: number
@@ -25,7 +25,7 @@ export function CompassRose({ x, y }: CompassRoseProps) {
         x="0" y="-22"
         textAnchor="middle"
         fill={A} fontSize="7"
-        fontFamily="'DM Mono'"
+        fontFamily={MONO}
         letterSpacing="0.1em"
       >
         N

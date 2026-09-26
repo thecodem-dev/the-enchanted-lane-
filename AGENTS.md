@@ -20,7 +20,12 @@ The Vite dev server runs on port **8443** by default (configurable via the `PORT
 
 | Path | Purpose |
 |---|---|
-| `src/App.tsx` | Root component — phase and language state |
+| `src/App.tsx` | Root component — phase (landing → intro → journey) and language state |
+| `src/lib/navigation.ts` | URLs without a router: `/` landing, `/sign-in`, `/board` intro + journey (signed-in only) |
+| `src/lib/auth.ts` | Passenger sign-in — **placeholder**, no backend yet; swap `signIn()` for the real service |
+| `src/components/SignInPage.tsx` | Sign-in page (sign-in only, no registration) |
+| `src/components/landing/` | Marketing landing page (formerly the separate enchanted-lane-landing project) |
+| `src/styles/tokens.ts` | Antique Brass palette and fonts used by app components |
 | `src/main.tsx` | React entry point |
 | `src/index.css` | Global styles and Tailwind CSS import |
 | `src/types/index.ts` | Shared TypeScript types |

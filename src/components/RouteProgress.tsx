@@ -1,7 +1,7 @@
 import { WaxSeal } from '@/components/ui/WaxSeal'
 import type { Language, Station } from '@/types'
 
-import { V, S, A, D, MONO } from '@/styles/tokens'
+import { V, T, A, D, MONO } from '@/styles/tokens'
 
 interface RouteProgressProps {
   awoken: Set<string>
@@ -32,8 +32,8 @@ export function RouteProgress({
     <div
       style={{
         height: barHeight,
-        borderTop: `1px solid rgba(201,168,76,0.18)`,
-        background: `rgba(5,14,24,0.98)`,
+        borderTop: `1px solid rgba(145,112,67,0.23)`,
+        background: `rgba(215,203,181,0.98)`,
         display: 'flex', alignItems: 'center',
         paddingLeft: px, paddingRight: px,
         flexShrink: 0, overflowX: 'auto',
@@ -71,8 +71,8 @@ export function RouteProgress({
                   <svg width={isMobile ? 12 : 14} height={isMobile ? 12 : 14} viewBox="0 0 14 14">
                     <rect
                       x="0" y="0" width="14" height="14"
-                      fill={isCurrent ? A : isAwoken ? S : V}
-                      stroke={isAwoken ? A : `rgba(201,168,76,0.25)`}
+                      fill={isCurrent ? A : V}
+                      stroke={isAwoken ? A : `rgba(145,112,67,0.33)`}
                       strokeWidth="1"
                       opacity={isAwoken ? 1 : 0.4}
                       transform="rotate(45 7 7)"
@@ -82,8 +82,8 @@ export function RouteProgress({
               </div>
               {!isMobile && (
                 <span style={{
-                  fontFamily: MONO, fontSize: 8, letterSpacing: '0.08em',
-                  color: isAwoken ? A : D,
+                  fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.08em',
+                  color: isAwoken ? T : D,
                   textTransform: 'uppercase', whiteSpace: 'nowrap',
                   opacity: isAwoken ? 1 : 0.45,
                 }}>
@@ -103,8 +103,8 @@ export function RouteProgress({
                     i < stIdx
                       ? A
                       : i === stIdx
-                        ? `linear-gradient(to right, ${A} ${tProg * 100}%, rgba(201,168,76,0.12) ${tProg * 100}%)`
-                        : 'rgba(201,168,76,0.12)',
+                        ? `linear-gradient(to right, ${A} ${tProg * 100}%, rgba(145,112,67,0.16) ${tProg * 100}%)`
+                        : 'rgba(145,112,67,0.16)',
                   transition: 'background 0.1s',
                   flexShrink: 0,
                 }}

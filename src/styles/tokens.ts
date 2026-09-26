@@ -1,42 +1,45 @@
 /**
- * Design tokens — single source of truth for the Blue Train palette and typefaces.
+ * Design tokens — single source of truth for the Antique Brass palette and typefaces.
  *
- * Derived from the actual Blue Train livery and interior:
- *   · Royal cobalt blue steel carriages (since 1937)
- *   · Gold-dusted windows (real gold film to reduce heat/glare)
- *   · Ivory linen tablecloths and stationery
- *   · Polished brass stanchions at departure
- *   · Malachite green upholstery in the lounge cars
+ * Matches the Enchanted Line landing page so both surfaces read as one brand.
+ * This is a LIGHT palette: dark espresso text on cream / tan surfaces.
+ *
+ * Contrast notes (WCAG, against cream #FAF4E0 / tan #D7CBB5):
+ *   · espresso  13.1 / 9.0  — any text
+ *   · muted      6.4 / 4.4  — secondary text
+ *   · rust       5.8 / 3.9  — accent text on cream, CTA fills (cream text on rust = 5.8)
+ *   · brass      4.2 / 2.9  — strokes, markers, borders, fills; not small text
+ *   · sage       2.2 / 1.5  — dividers and decoration only; never text
  *
  * Usage:  import { PALETTE, FONTS } from '@/styles/tokens'
  */
 
 // ── Palette ────────────────────────────────────────────────────
 export const PALETTE = {
-  /** Night sky through gold-tinted glass */
-  void:       '#0A0F1A',
-  /** Cobalt carriage body / bulkhead panels */
-  surface:    '#0F1E3A',
-  /** Dining car wood panelling */
-  panel:      '#162444',
-  /** Ivory linen — tablecloths, notepaper */
-  text:       '#F0E8D0',
-  /** Polished brass + exterior chevrons */
-  gold:       '#C9A84C',
-  /** Highlighted gold trim */
-  goldBright: '#E8C96A',
-  /** Aged brass — subdued labels */
-  goldDim:    '#7A6230',
-  /** Malachite green — lounge upholstery */
-  support:    '#4A7C6A',
-  /** Steel blue — window frames, muted text */
-  dim:        '#2A4A6A',
-  /** Locomotive red — train marker */
-  rust:       '#7A2E1A',
-  /** Dark amber — hover background */
-  reveal:     '#2C1A08',
-  /** Lamp black — text on gold buttons */
-  ink:        '#1A0E08',
+  /** Cream — page background */
+  void:       '#FAF4E0',
+  /** Tan — raised cards, sidebar, top bar */
+  surface:    '#D7CBB5',
+  /** Tan — raised panels */
+  panel:      '#D7CBB5',
+  /** Espresso — primary text */
+  text:       '#3E2318',
+  /** Brass — primary accent: markers, strokes, active states */
+  gold:       '#917043',
+  /** Rust — emphasis */
+  goldBright: '#88523D',
+  /** Sage — subdued decoration */
+  goldDim:    '#A6A99A',
+  /** Sage — muted accent, dividers */
+  support:    '#A6A99A',
+  /** Muted espresso — secondary text (sage fails contrast as text) */
+  dim:        '#6B5444',
+  /** Rust — CTAs, accent text, emphasis */
+  rust:       '#88523D',
+  /** Tan + 12% brass — card hover background */
+  reveal:     '#CFC0A7',
+  /** Cream — text on rust buttons */
+  ink:        '#FAF4E0',
 } as const
 
 // ── Short aliases matching the single-letter names used throughout the codebase ──
@@ -65,10 +68,12 @@ export const INK = PALETTE.ink
 
 // ── Typefaces ──────────────────────────────────────────────────
 export const FONTS = {
-  display: "'Cormorant Garamond', 'Playfair Display', Georgia, serif",
-  text:    "'Crimson Pro', Georgia, serif",
-  sans:    "'Libre Franklin', system-ui, sans-serif",
-  mono:    "'DM Mono', 'Courier New', monospace",
+  /** Del Rose — hero / display moments only (single weight: always fontWeight 400) */
+  display: "'Del Rose', Georgia, serif",
+  text:    "'Poppins', system-ui, sans-serif",
+  sans:    "'Poppins', system-ui, sans-serif",
+  /** Labels and codes — formerly DM Mono; weight + letter-spacing now carry the label feel */
+  mono:    "'Poppins', system-ui, sans-serif",
 } as const
 
 /** @alias FONTS.display */

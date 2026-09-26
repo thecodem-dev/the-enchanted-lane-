@@ -743,12 +743,13 @@ export const CATEGORY_LABELS: Record<AttractionCategory, string> = {
 }
 
 export const CATEGORY_COLOURS: Record<AttractionCategory, string> = {
-  history:      '#c9a45a',
-  museum:       '#7a9bc9',
-  nature:       '#6aab7a',
-  heritage:     '#c9a45a',
-  arts:         '#b07ac9',
-  science:      '#7ac9c0',
-  township:     '#c97a7a',
-  architecture: '#c9b87a',
+  // Earthy, darkened hues — each clears 4.5:1 on the cream card panel
+  history:      '#7A5A30',
+  museum:       '#4F6378',
+  nature:       '#4E6B45',
+  heritage:     '#88523D',
+  arts:         '#74506E',
+  science:      '#3F6B68',
+  township:     '#9A4A3F',
+  architecture: '#6E6233',
 }

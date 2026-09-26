@@ -3,7 +3,15 @@ import { APIProvider, AdvancedMarker, Map, Polyline } from '@vis.gl/react-google
 import { STATIONS } from '@/data/stations'
 import type { Language, Station } from '@/types'
 
-import { V, S, A, T, D, MONO } from '@/styles/tokens'
+// ── Map palette — pinned to the previous Blue Train values ─────
+// The map markers are intentionally left out of the Antique Brass
+// palette pass for now, so they don't follow '@/styles/tokens'.
+const V    = '#0A0F1A'
+const S    = '#0F1E3A'
+const A    = '#C9A84C'
+const T    = '#F0E8D0'
+const D    = '#2A4A6A'
+const MONO = "'DM Mono', 'Courier New', monospace"
 
 interface GoogleMapViewProps {
   stIdx: number
