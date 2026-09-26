@@ -7,6 +7,7 @@ import { DashboardSidebar } from '@/components/DashboardSidebar'
 import { StationContent } from '@/components/StationContent'
 import { HiddenGemsPanel } from '@/components/HiddenGemsPanel'
 import { VideoModal } from '@/components/VideoModal'
+import { StationWeather } from '@/components/StationWeather'
 import { ChapterUnlockedBanner } from '@/components/ui/ChapterUnlockedBanner'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { V, S, T, A, D, R, MONO, SANS, DISPLAY } from '@/styles/tokens'
@@ -79,6 +80,7 @@ export function JourneyView({
             Enchanted Line
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {currentStation && <StationWeather station={currentStation} />}
             <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
               {STATIONS[stIdx]?.num ?? 'I'} / IX
             </span>
@@ -165,6 +167,7 @@ export function JourneyView({
               <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
                 {currentStation.names[lang]}
               </span>
+              <StationWeather station={currentStation} />
               {!isComplete && (
                 <button
                   onClick={onContinue}

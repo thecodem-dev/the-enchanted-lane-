@@ -1,17 +1,31 @@
 import { useRef, useState, useEffect } from 'react'
-import { APIProvider, AdvancedMarker, Map, Polyline } from '@vis.gl/react-google-maps'
+import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { STATIONS } from '@/data/stations'
+import { useStationWeather, type StationWeather } from '@/hooks/useStationWeather'
 import type { Language, Station } from '@/types'
 
 // ── Map palette — pinned to the previous Blue Train values ─────
-// The map markers are intentionally left out of the Antique Brass
-// palette pass for now, so they don't follow '@/styles/tokens'.
 const V    = '#0A0F1A'
 const S    = '#0F1E3A'
 const A    = '#C9A84C'
 const T    = '#F0E8D0'
 const D    = '#2A4A6A'
 const MONO = "'DM Mono', 'Courier New', monospace"
+
+// South African bounds in GeoJSON [lng, lat] format. These are used only for
+// the initial view; the user can still pan and zoom freely afterward.
+const ROUTE_BOUNDS: [[number, number], [number, number]] = [
+  [16.0, -35.0],
+  [33.0, -22.0],
+]
+
+function mapPosition(lng: number, lat: number) {
+  if (!Number.isFinite(lng) || !Number.isFinite(lat)) {
+    throw new Error(`Invalid map coordinate: ${lng}, ${lat}`)
+  }
+  return { lng, lat }
+}
 
 interface GoogleMapViewProps {
   stIdx: number
@@ -26,94 +40,80 @@ interface GoogleMapViewProps {
   onVideoClick?: (s: Station) => void
 }
 
-// Custom pin element — a styled HTML element rendered inside AdvancedMarker
-function StationPin({
-  station, isAwoken, isDone, isCurrent, onClick,
-}: {
-  station: Station
-  isAwoken: boolean
-  isDone: boolean
-  isCurrent: boolean
-  onClick: () => void
-}) {
-  const [hovered, setHovered] = useState(false)
+function weatherIcon(code: number) {
+  if (code === 0) return '☀'
+  if (code <= 3) return '☁'
+  if (code <= 48) return '≋'
+  if (code <= 67) return '☂'
+  return '⚡'
+}
 
-  const bg = isDone
-    ? A
-    : isAwoken
-      ? '#D4A84C'
-      : S
+function createStationMarker(
+  station: Station,
+  isAwoken: boolean,
+  isDone: boolean,
+  isCurrent: boolean,
+  weather?: StationWeather
+) {
+  const element = document.createElement('div')
+  element.style.cssText = 'position:relative;width:1px;height:1px;display:block;pointer-events:none'
 
-  const borderColor = isDone
-    ? '#DDB84E'
-    : isAwoken
-      ? A
-      : D
+  const pin = document.createElement('button')
+  pin.type = 'button'
+  pin.title = `${station.names.en} — click to watch`
 
-  const textColor = isDone || isAwoken ? V : A
+  const label = document.createElement('span')
+  label.textContent = station.num
+  label.style.transform = 'rotate(45deg)'
+  pin.appendChild(label)
 
-  return (
-    <div
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      title={`${station.names.en} — click to watch`}
-      style={{
-        position: 'relative',
-        cursor: 'pointer',
-        transform: hovered || isCurrent ? 'scale(1.25) translateY(-4px)' : 'scale(1)',
-        transition: 'transform 0.18s cubic-bezier(0.34,1.56,0.64,1)',
-        filter: isCurrent ? `drop-shadow(0 0 8px ${A})` : hovered ? `drop-shadow(0 0 5px rgba(201,168,76,0.6))` : 'none',
-      }}
-    >
-      {/* Pin body */}
-      <div style={{
-        width: 32, height: 38,
-        background: bg,
-        border: `2px solid ${borderColor}`,
-        borderRadius: '50% 50% 50% 0',
-        transform: 'rotate(-45deg)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: `0 3px 12px rgba(0,0,0,0.5)`,
-      }}>
-        {/* Inner content — rotated back */}
-        <div style={{
-          transform: 'rotate(45deg)',
-          fontFamily: MONO,
-          fontSize: station.num.length > 2 ? 8 : 10,
-          fontWeight: 700,
-          color: textColor,
-          lineHeight: 1,
-          userSelect: 'none',
-        }}>
-          {station.num}
-        </div>
-      </div>
+  pin.style.cssText = [
+    'position:absolute',
+    'top:-38px',
+    'left:-16px',
+    'z-index:2',
+    'padding:0',
+    'width:32px',
+    'height:38px',
+    'cursor:pointer',
+    'font-family:' + MONO,
+    'font-size:' + (station.num.length > 2 ? '8px' : '10px'),
+    'font-weight:700',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'color:' + (isDone || isAwoken ? V : A),
+    'background:' + (isDone ? A : isAwoken ? '#D4A84C' : S),
+    'border:2px solid ' + (isDone ? '#DDB84E' : isAwoken ? A : D),
+    'border-radius:50% 50% 50% 0',
+    'transform:rotate(-45deg)' + (isCurrent ? ' scale(1.25)' : ''),
+    'box-shadow:0 3px 12px rgba(0,0,0,0.5)',
+    'transition:transform .18s ease',
+  ].join(';')
 
-      {/* Play icon on hover */}
-      {hovered && (
-        <div style={{
-          position: 'absolute', top: -28, left: '50%',
-          transform: 'translateX(-50%)',
-          background: S,
-          border: `1px solid rgba(201,168,76,0.4)`,
-          borderRadius: 4,
-          padding: '3px 8px',
-          display: 'flex', alignItems: 'center', gap: 5,
-          whiteSpace: 'nowrap',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.6)',
-          pointerEvents: 'none',
-        }}>
-          <svg width="8" height="9" viewBox="0 0 8 9">
-            <polygon points="0,0 8,4.5 0,9" fill={A} />
-          </svg>
-          <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.08em', color: T }}>
-            {station.names.en}
-          </span>
-        </div>
-      )}
-    </div>
-  )
+  element.appendChild(pin)
+
+  if (weather) {
+    const badge = document.createElement('div')
+    badge.textContent = `${weatherIcon(weather.weatherCode)} ${Math.round(weather.maximumTemperature)}° / ${Math.round(weather.temperature)}°  ·  ${weather.precipitation.toFixed(1)}mm  ·  ${Math.round(weather.windSpeed)}km/h`
+    badge.title = `${station.name}: max ${Math.round(weather.maximumTemperature)}°C, rainfall ${weather.precipitation.toFixed(1)}mm, wind ${Math.round(weather.windSpeed)} km/h`
+    badge.style.cssText = 'position:absolute;top:4px;left:-56px;width:112px;box-sizing:border-box;padding:3px 4px;border:1px solid rgba(201,168,76,.55);border-radius:3px;background:rgba(10,15,26,.92);color:#F0E8D0;font:700 8px ' + MONO + ';letter-spacing:.02em;text-align:center;white-space:nowrap;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,.4)'
+    element.appendChild(badge)
+  }
+
+  pin.style.pointerEvents = 'auto'
+  element.addEventListener('mouseenter', () => { pin.style.transform = 'rotate(-45deg) scale(1.25)' })
+  element.addEventListener('mouseleave', () => { pin.style.transform = `rotate(-45deg)${isCurrent ? ' scale(1.25)' : ''}` })
+
+  return element
+}
+
+function createTrainMarker() {
+  const element = document.createElement('div')
+  element.setAttribute('aria-label', 'The Enchanted Line')
+  element.innerHTML = '<svg width="14" height="10" viewBox="0 0 14 10" fill="none"><rect x="0" y="2" width="12" height="5" rx="1.5" fill="#F0E8D0"/><rect x="2" y="0" width="7" height="4" rx="1" fill="#F0E8D0" opacity=".75"/><circle cx="2.5" cy="8" r="1.5" fill="#F0E8D0"/><circle cx="8.5" cy="8" r="1.5" fill="#F0E8D0"/></svg>'
+  element.style.cssText = 'width:28px;height:28px;background:#7a2e1a;border:2px solid #F0E8D0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(122,46,26,.8),0 2px 8px rgba(0,0,0,.6)'
+  return element
 }
 
 export function GoogleMapView({
@@ -126,120 +126,164 @@ export function GoogleMapView({
   onVideoClick,
 }: GoogleMapViewProps) {
   const wrapperRef = useRef<HTMLDivElement>(null)
-  const [size, setSize] = useState<{ w: number; h: number } | null>(null)
+  const mapRef = useRef<MapLibreMap | null>(null)
+  const stationMarkersRef = useRef<Marker[]>([])
+  const trainMarkerRef = useRef<Marker | null>(null)
+  const onStationClickRef = useRef(onStationClick)
+  const onVideoClickRef = useRef(onVideoClick)
+  const [mapReady, setMapReady] = useState(false)
+  const { weather } = useStationWeather()
 
+  onStationClickRef.current = onStationClick
+  onVideoClickRef.current = onVideoClick
+
+  const current = STATIONS[stIdx] ?? STATIONS[0]!
+  const next = STATIONS[Math.min(stIdx + 1, STATIONS.length - 1)] ?? current
+
+  const trainPosition = mapPosition(
+    current.lng + (next.lng - current.lng) * tProg,
+    current.lat + (next.lat - current.lat) * tProg
+  )
+
+  // Initialize Map
   useEffect(() => {
-    const el = wrapperRef.current
-    if (!el) return
-    setSize({ w: el.offsetWidth, h: el.offsetHeight })
-    const ro = new ResizeObserver(entries => {
-      const entry = entries[0]
-      if (!entry) return
-      setSize({ w: Math.floor(entry.contentRect.width), h: Math.floor(entry.contentRect.height) })
+    if (!wrapperRef.current) return
+
+    const map = new maplibregl.Map({
+      container: wrapperRef.current,
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [24.5, -30.5],
+      zoom: 4.5,
+      minZoom: 2,
+      maxZoom: 14,
     })
-    ro.observe(el)
-    return () => ro.disconnect()
+
+    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right')
+
+    map.on('load', () => {
+      setMapReady(true)
+      try {
+        map.fitBounds(ROUTE_BOUNDS, {
+          padding: 80,
+          duration: 0,
+        })
+      } catch {
+        map.setCenter([24.5, -30.5])
+        map.setZoom(4.5)
+      }
+    })
+
+    mapRef.current = map
+
+    return () => {
+      stationMarkersRef.current.forEach(marker => marker.remove())
+      stationMarkersRef.current = []
+      trainMarkerRef.current?.remove()
+      trainMarkerRef.current = null
+      map.remove()
+      mapRef.current = null
+    }
   }, [])
 
-  const current = STATIONS[stIdx]
-  const next = STATIONS[Math.min(stIdx + 1, STATIONS.length - 1)]
-  if (!current || !next) return null
+  // Sync Route Lines and Train Marker
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
 
-  const trainPosition = {
-    lat: current.lat + (next.lat - current.lat) * tProg,
-    lng: current.lng + (next.lng - current.lng) * tProg,
-  }
+    const route = STATIONS.map(s => {
+      const pos = mapPosition(s.lng, s.lat)
+      return [pos.lng, pos.lat]
+    })
 
-  const route = STATIONS.map(s => ({ lat: s.lat, lng: s.lng }))
-  const travelledRoute = [
-    ...STATIONS.slice(0, stIdx + 1).map(s => ({ lat: s.lat, lng: s.lng })),
-    ...(stIdx < STATIONS.length - 1 ? [trainPosition] : []),
-  ]
+    const travelledRoute = [
+      ...STATIONS.slice(0, stIdx + 1).map(s => {
+        const pos = mapPosition(s.lng, s.lat)
+        return [pos.lng, pos.lat]
+      }),
+      ...(stIdx < STATIONS.length - 1 ? [[trainPosition.lng, trainPosition.lat]] : []),
+    ]
+
+    const routeData = (coordinates: number[][]) => ({
+      type: 'Feature' as const,
+      properties: {},
+      geometry: { type: 'LineString' as const, coordinates },
+    })
+
+    const fullSource = map.getSource('full-route') as maplibregl.GeoJSONSource | undefined
+    const travelledSource = map.getSource('travelled-route') as maplibregl.GeoJSONSource | undefined
+
+    if (!fullSource) {
+      map.addSource('full-route', { type: 'geojson', data: routeData(route) })
+      map.addLayer({
+        id: 'full-route-line',
+        type: 'line',
+        source: 'full-route',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': A, 'line-opacity': 0.3, 'line-width': 3, 'line-dasharray': [2, 2] },
+      })
+      map.addSource('travelled-route', { type: 'geojson', data: routeData(travelledRoute) })
+      map.addLayer({
+        id: 'travelled-route-line',
+        type: 'line',
+        source: 'travelled-route',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': A, 'line-opacity': 0.95, 'line-width': 5 },
+      })
+    } else {
+      fullSource.setData(routeData(route))
+      travelledSource?.setData(routeData(travelledRoute))
+    }
+
+    if (!trainMarkerRef.current) {
+      trainMarkerRef.current = new maplibregl.Marker({ element: createTrainMarker() })
+        .setLngLat(trainPosition)
+        .addTo(map)
+    } else {
+      trainMarkerRef.current.setLngLat(trainPosition)
+    }
+  }, [mapReady, stIdx, tProg, trainPosition.lat, trainPosition.lng])
+
+  // Sync Station Markers
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !mapReady) return
+
+    stationMarkersRef.current.forEach(marker => marker.remove())
+    stationMarkersRef.current = STATIONS.map(station => {
+      const weatherData = weather[station.id] || weather[station.name]
+      const pos = mapPosition(station.lng, station.lat)
+
+      const marker = new maplibregl.Marker({
+        element: createStationMarker(
+          station,
+          awoken.has(station.id),
+          completed.has(station.id),
+          station.id === current.id,
+          weatherData
+        ),
+        anchor: 'center',
+      })
+        .setLngLat(pos)
+        .addTo(map)
+
+      marker.getElement().addEventListener('click', () => {
+        if (onVideoClickRef.current) {
+          onVideoClickRef.current(station)
+        } else if (awoken.has(station.id)) {
+          onStationClickRef.current(station)
+        }
+      })
+
+      return marker
+    })
+  }, [mapReady, stIdx, awoken, completed, lang, current.id, weather])
 
   return (
     <div ref={wrapperRef} style={{ position: 'absolute', inset: 0 }}>
-      {size && size.w > 0 && size.h > 0 && (
-        <APIProvider apiKey={import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] ?? ''}>
-          <Map
-            defaultCenter={{ lat: -30.5, lng: 24.5 }}
-            defaultZoom={6}
-            mapId="DEMO_MAP_ID"
-            mapTypeId="terrain"
-            gestureHandling="greedy"
-            disableDefaultUI={false}
-            style={{ width: size.w, height: size.h, display: 'block' }}
-          >
-            {/* Full route — dim */}
-            <Polyline
-              path={route}
-              strokeColor={A}
-              strokeOpacity={0.22}
-              strokeWeight={3}
-            />
-            {/* Travelled route — bright */}
-            <Polyline
-              path={travelledRoute}
-              strokeColor={A}
-              strokeOpacity={0.92}
-              strokeWeight={5}
-            />
-
-            {/* Station markers — ALL clickable */}
-            {STATIONS.map(station => {
-              const isAwoken  = awoken.has(station.id)
-              const isDone    = completed.has(station.id)
-              const isCurrent = station.id === STATIONS[stIdx]?.id
-
-              const handleClick = () => {
-                // Always fire the video modal if the callback is provided
-                if (onVideoClick) {
-                  onVideoClick(station)
-                } else if (isAwoken) {
-                  onStationClick(station)
-                }
-              }
-
-              return (
-                <AdvancedMarker
-                  key={station.id}
-                  position={{ lat: station.lat, lng: station.lng }}
-                  title={station.names[lang]}
-                  clickable
-                  onClick={handleClick}
-                >
-                  <StationPin
-                    station={station}
-                    isAwoken={isAwoken}
-                    isDone={isDone}
-                    isCurrent={isCurrent}
-                    onClick={handleClick}
-                  />
-                </AdvancedMarker>
-              )
-            })}
-
-            {/* Train marker */}
-            <AdvancedMarker position={trainPosition} title="The Enchanted Line">
-              <div style={{
-                width: 28, height: 28,
-                background: '#7a2e1a',
-                border: `2px solid ${T}`,
-                borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: `0 0 12px rgba(122,46,26,0.8), 0 2px 8px rgba(0,0,0,0.6)`,
-                animation: 'glowPulse 1.5s ease-in-out infinite',
-              }}>
-                {/* Tiny train icon */}
-                <svg width="14" height="10" viewBox="0 0 14 10" fill="none">
-                  <rect x="0" y="2" width="12" height="5" rx="1.5" fill={T} opacity="0.9" />
-                  <rect x="2" y="0" width="7" height="4" rx="1" fill={T} opacity="0.75" />
-                  <circle cx="2.5" cy="8" r="1.5" fill={T} opacity="0.9" />
-                  <circle cx="8.5" cy="8" r="1.5" fill={T} opacity="0.9" />
-                </svg>
-              </div>
-            </AdvancedMarker>
-          </Map>
-        </APIProvider>
+      {!mapReady && (
+        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: T, background: '#0A0F1A' }}>
+          Loading map...
+        </div>
       )}
     </div>
   )
