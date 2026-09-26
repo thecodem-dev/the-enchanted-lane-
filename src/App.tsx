@@ -16,8 +16,9 @@ import { IntroScreen } from '@/components/IntroScreen'
 import { JourneyView } from '@/components/JourneyView'
 import { OfflineBanner } from '@/components/OfflineBanner'
 import { useTrainAnimation } from '@/hooks/useTrainAnimation'
-import { getSession } from '@/lib/auth'
-import { BOARD_PATH, SIGN_IN_PATH, redirect, routeFromPath } from '@/lib/navigation'
+import { getSession, signOut } from '@/lib/auth'
+import { setPreference, usePreferences } from '@/lib/preferences'
+import { BOARD_PATH, LANDING_PATH, SIGN_IN_PATH, navigate, redirect, routeFromPath } from '@/lib/navigation'
 import type { Language, Phase } from '@/types'
 
 /**
@@ -38,7 +39,13 @@ function phaseForUrl(prev: Phase): Phase {
 
 export default function App() {
   const [phase, setPhase] = useState<Phase>(() => phaseForUrl('landing'))
-  const [lang, setLang] = useState<Language>('en')
+  const { language: lang, reduceMotion } = usePreferences()
+  const setLang = (l: Language) => setPreference('language', l)
+
+  // Settings › Reduce motion — index.css stills animations under this attribute
+  useEffect(() => {
+    document.documentElement.toggleAttribute('data-reduce-motion', reduceMotion)
+  }, [reduceMotion])
 
   // Back/forward and in-app links re-resolve the screen from the URL.
   useEffect(() => {
@@ -60,7 +67,15 @@ export default function App() {
     newlyAwoken,
     setActiveStation,
     handleContinue,
+    resetJourney,
   } = useTrainAnimation()
+
+  // The next passenger on this device starts from Pretoria.
+  const handleSignOut = () => {
+    signOut()
+    resetJourney()
+    navigate(LANDING_PATH)
+  }
 
   return (
     <>
@@ -77,6 +92,7 @@ export default function App() {
       ) : (
         <JourneyView
           lang={lang}
+          setLang={setLang}
           stIdx={stIdx}
           tProg={tProg}
           awoken={awoken}
@@ -87,6 +103,8 @@ export default function App() {
           onStationClick={s => { if (awoken.has(s.id)) setActiveStation(s) }}
           onCloseChapter={() => setActiveStation(null)}
           onContinue={handleContinue}
+          onResetJourney={resetJourney}
+          onSignOut={handleSignOut}
         />
       )}
 

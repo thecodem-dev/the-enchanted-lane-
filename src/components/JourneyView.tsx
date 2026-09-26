@@ -3,20 +3,26 @@ import { STATIONS } from '@/data/stations'
 import { GoogleMapView } from '@/components/GoogleMapView'
 import { ChapterPanel } from '@/components/ChapterPanel'
 import { RouteProgress } from '@/components/RouteProgress'
-import { DashboardSidebar } from '@/components/DashboardSidebar'
-import { StationContent } from '@/components/StationContent'
+import { DashboardSidebar, MobileNavBar } from '@/components/DashboardSidebar'
 import { HiddenGemsPanel } from '@/components/HiddenGemsPanel'
 import { QuizPanel } from '@/components/QuizPanel'
+import { PassportPanel } from '@/components/PassportPanel'
+import { ThemaPanel } from '@/components/ThemaPanel'
+import { SettingsPanel } from '@/components/SettingsPanel'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { Logo } from '@/components/ui/Logo'
 import { VideoModal } from '@/components/VideoModal'
 import { StationWeather } from '@/components/StationWeather'
 import { ChapterUnlockedBanner } from '@/components/ui/ChapterUnlockedBanner'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { usePreferences } from '@/lib/preferences'
 import { V, S, T, A, D, R, MONO, SANS, DISPLAY } from '@/styles/tokens'
 import type { Language, Station } from '@/types'
 import type { NavItem } from '@/components/DashboardSidebar'
 
 interface JourneyViewProps {
   lang: Language
+  setLang: (l: Language) => void
   stIdx: number
   tProg: number
   awoken: Set<string>
@@ -27,10 +33,13 @@ interface JourneyViewProps {
   onStationClick: (s: Station) => void
   onCloseChapter: () => void
   onContinue: () => void
+  onResetJourney: () => void
+  onSignOut: () => void
 }
 
 export function JourneyView({
   lang,
+  setLang,
   stIdx,
   tProg,
   awoken,
@@ -41,8 +50,11 @@ export function JourneyView({
   onStationClick,
   onCloseChapter,
   onContinue,
+  onResetJourney,
+  onSignOut,
 }: JourneyViewProps) {
   const isMobile = useIsMobile()
+  const { chapterAlerts } = usePreferences()
   const isComplete = stIdx >= STATIONS.length - 1 && !isMoving
   const currentStation = STATIONS[stIdx]
   const [activeNav, setActiveNav] = useState<NavItem>('map')
@@ -59,6 +71,40 @@ export function JourneyView({
 
   const progressPct = ((stIdx + tProg) / (STATIONS.length - 1)) * 100
 
+  /* ── Sidebar pages (everything except the map) — shared by desktop and mobile ── */
+  const slideIn = { minHeight: '100%', animation: 'chapterSlideIn 0.5s ease-out both' }
+  const page =
+    activeNav === 'gems' ? (
+      <div style={{ minHeight: '100%' }}>
+        <HiddenGemsPanel stIdx={stIdx} lang={lang} awoken={awoken} />
+      </div>
+    ) : activeNav === 'quiz' ? (
+      <div style={slideIn}>
+        <PageHeader eyebrow="Quiz" title="The journey quiz" subtitle="Questions from the stations you’ve reached." />
+        <QuizPanel awoken={awoken} lang={lang} />
+      </div>
+    ) : activeNav === 'passport' ? (
+      <div style={slideIn}>
+        <PassportPanel
+          lang={lang} stIdx={stIdx} completed={completed}
+          onOpenStation={s => { setActiveNav('map'); onStationClick(s) }}
+        />
+      </div>
+    ) : activeNav === 'thema' ? (
+      <div style={slideIn}>
+        <ThemaPanel />
+      </div>
+    ) : activeNav === 'settings' ? (
+      <div style={slideIn}>
+        <SettingsPanel
+          lang={lang} setLang={setLang}
+          stIdx={stIdx} completed={completed}
+          onResetJourney={() => { onResetJourney(); setActiveNav('map') }}
+          onSignOut={onSignOut}
+        />
+      </div>
+    ) : null
+
   /* ── Mobile layout ─────────────────────────────────────────── */
   if (isMobile) {
     return (
@@ -74,14 +120,17 @@ export function JourneyView({
           paddingLeft: 16, paddingRight: 16, flexShrink: 0,
           background: `rgba(215,203,181,0.96)`, backdropFilter: 'blur(8px)',
         }}>
-          <span style={{
-            fontFamily: DISPLAY, fontSize: 20,
-            fontWeight: 400, color: T, lineHeight: 1,
-          }}>
-            Enchanted Line
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Logo className="h-7 w-7 ring-1 ring-brass/50" />
+            <span style={{
+              fontFamily: DISPLAY, fontSize: 20,
+              fontWeight: 400, color: T, lineHeight: 1,
+            }}>
+              Enchanted Line
+            </span>
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {currentStation && <StationWeather station={currentStation} />}
+            {/* No weather readout here — too wide for a phone; the map shows it per station */}
             <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
               {STATIONS[stIdx]?.num ?? 'I'} / IX
             </span>
@@ -98,23 +147,55 @@ export function JourneyView({
           </div>
         </div>
 
-        {/* Map area */}
-        <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-          <GoogleMapView
-            stIdx={stIdx} tProg={tProg} awoken={awoken} completed={completed} lang={lang}
-            onStationClick={onStationClick}
-            onVideoClick={openVideo}
-          />
-          {newlyAwoken && <ChapterUnlockedBanner />}
-        </div>
+        {activeNav === 'map' ? (
+          <>
+            {/* Map area */}
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+              <GoogleMapView
+                stIdx={stIdx} tProg={tProg} awoken={awoken} completed={completed} lang={lang}
+                onStationClick={onStationClick}
+                onVideoClick={openVideo}
+              />
+              {newlyAwoken && chapterAlerts && (
+                <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
+                  <ChapterUnlockedBanner />
+                </div>
+              )}
+              {/* Depart — the desktop top bar's button, floated over the map */}
+              {!isComplete && !activeStation && (
+                <button
+                  onClick={onContinue}
+                  disabled={isMoving}
+                  style={{
+                    position: 'absolute', left: 12, bottom: 52, zIndex: 10,
+                    background: isMoving ? 'rgba(250,244,224,0.92)' : R,
+                    border: `1px solid ${isMoving ? 'rgba(145,112,67,0.35)' : R}`,
+                    borderRadius: 4, padding: '10px 16px', minHeight: 44,
+                    fontFamily: MONO, fontWeight: 500, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
+                    color: isMoving ? D : V, cursor: isMoving ? 'default' : 'pointer',
+                    boxShadow: '0 4px 14px rgba(62,35,24,0.2)',
+                  }}
+                >
+                  {isMoving ? 'En Route…' : `Depart for ${STATIONS[stIdx + 1]?.names[lang] ?? ''} →`}
+                </button>
+              )}
+            </div>
 
-        <RouteProgress
-          awoken={awoken} completed={completed} stations={STATIONS}
-          lang={lang} stIdx={stIdx} tProg={tProg} isMobile
-          onStationClick={s => { if (awoken.has(s.id)) onStationClick(s) }}
-        />
+            <RouteProgress
+              awoken={awoken} completed={completed} stations={STATIONS}
+              lang={lang} stIdx={stIdx} tProg={tProg} isMobile
+              onStationClick={s => { if (awoken.has(s.id)) onStationClick(s) }}
+            />
+          </>
+        ) : (
+          <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            {page}
+          </div>
+        )}
 
-        {activeStation && (
+        <MobileNavBar awoken={awoken} completed={completed} activeNav={activeNav} onNavChange={setActiveNav} />
+
+        {activeStation && activeNav === 'map' && (
           <ChapterPanel
             station={activeStation} lang={lang} completed={completed}
             isComplete={isComplete} onClose={onCloseChapter} onContinue={onContinue}
@@ -149,15 +230,7 @@ export function JourneyView({
         boxShadow: `0 1px 0 rgba(145,112,67,0.1), 0 4px 20px rgba(62,35,24,0.14)`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-            <rect x="1" y="7" width="16" height="6" rx="2" fill="none" stroke={A} strokeWidth="1.2" />
-            <rect x="4" y="3" width="10" height="5" rx="1" fill="none" stroke={A} strokeWidth="1.2" />
-            <circle cx="4.5" cy="14" r="1.5" fill={A} />
-            <circle cx="13.5" cy="14" r="1.5" fill={A} />
-            <line x1="1" y1="9.5" x2="0" y2="9.5" stroke={A} strokeWidth="1.5" />
-            <rect x="7" y="5" width="2" height="3" fill={A} opacity="0.4" />
-            <rect x="10" y="5" width="2" height="3" fill={A} opacity="0.4" />
-          </svg>
+          <Logo className="h-9 w-9 ring-1 ring-brass/50" />
           <span style={{ fontFamily: DISPLAY, fontSize: 22, fontWeight: 400, color: T, lineHeight: 1 }}>
             The Enchanted Line
           </span>
@@ -225,7 +298,7 @@ export function JourneyView({
           background: V, position: 'relative',
         }}>
           {/* Chapter unlocked toast */}
-          {newlyAwoken && (
+          {newlyAwoken && chapterAlerts && (
             <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
               <ChapterUnlockedBanner />
             </div>
@@ -282,26 +355,7 @@ export function JourneyView({
                 onStationClick={s => { if (awoken.has(s.id)) onStationClick(s); openVideo(s) }}
               />
             </div>
-          ) : activeNav === 'gems' ? (
-            <div style={{ minHeight: '100%' }}>
-              <HiddenGemsPanel stIdx={stIdx} lang={lang} awoken={awoken} />
-            </div>
-          ) : activeNav === 'quiz' ? (
-            <div style={{ minHeight: '100%', animation: 'chapterSlideIn 0.5s ease-out both' }}>
-              <QuizPanel awoken={awoken} lang={lang} />
-            </div>
-          ) : (
-            currentStation && (
-              <div key={stIdx} style={{ minHeight: '100%', animation: 'chapterSlideIn 0.5s ease-out both' }}>
-                <StationContent
-                  station={currentStation} lang={lang}
-                  isMoving={isMoving} isComplete={isComplete}
-                  stIdx={stIdx} completed={completed}
-                  onContinue={onContinue}
-                />
-              </div>
-            )
-          )}
+          ) : page}
         </div>
       </div>
 

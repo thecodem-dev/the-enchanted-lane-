@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import heroVideo from '@/assets/landing/enchanted-header-vid2.webm'
-import { Logo } from '@/components/landing/Logo'
+import { Logo } from '@/components/ui/Logo'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { SignInError, isValidEmail, signIn } from '@/lib/auth'
 import { BOARD_PATH, LANDING_PATH, goToLanding, navigate } from '@/lib/navigation'

@@ -1,4 +1,4 @@
-import { Logo } from "./Logo";
+import { Logo } from "@/components/ui/Logo";
 import { SIGN_IN_PATH, goToSignIn } from "@/lib/navigation";
 
 const LINKS = [

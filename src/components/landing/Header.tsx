@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { Logo } from "./Logo";
+import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { getSession } from "@/lib/auth";
 import { BOARD_PATH, SIGN_IN_PATH, goToBoard, goToSignIn } from "@/lib/navigation";

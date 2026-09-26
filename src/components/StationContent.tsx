@@ -161,8 +161,8 @@ export function StationContent({
                   Passport Stamped
                 </div>
                 <div style={{
-                  fontFamily: SANS,
-                  fontStyle: 'italic', fontSize: 14, color: R,
+                  fontFamily: DISPLAY,
+                  fontSize: 22, fontWeight: 400, color: T, lineHeight: 1.1,
                 }}>
                   Chapter {station.num} — {station.names[lang]}
                 </div>

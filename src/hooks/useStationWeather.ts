@@ -29,6 +29,15 @@ function weatherRequestUrl() {
   return `${WEATHER_URL}?${params.toString()}`
 }
 
+/** Single-glyph icon for a WMO weather code — shared by the map and top bar */
+export function weatherIcon(code: number) {
+  if (code === 0) return '☀'
+  if (code <= 3) return '☁'
+  if (code <= 48) return '≋'
+  if (code <= 67) return '☂'
+  return '⚡'
+}
+
 export function weatherDescription(code: number) {
   if (code === 0) return 'Clear'
   if (code <= 3) return 'Partly cloudy'

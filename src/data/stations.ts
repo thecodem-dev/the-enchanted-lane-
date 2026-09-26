@@ -194,3 +194,8 @@ export const TERRAIN_AREAS = {
   karoo: '382,432 428,358 350,350 280,390 250,450 298,496 382,432',
   highveld: '532,290 596,220 620,180 660,185 680,250 640,310 560,320 532,290',
 }
+
+/** A station name short enough for tight labels: "Beaufort West" → "Beaufort", "De Aar" stays whole */
+export function shortStationName(name: string): string {
+  return name.length <= 12 ? name : name.split(' ')[0] ?? name
+}

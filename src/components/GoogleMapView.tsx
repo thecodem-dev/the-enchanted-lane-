@@ -2,22 +2,23 @@ import { useRef, useState, useEffect } from 'react'
 import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { STATIONS } from '@/data/stations'
-import { useStationWeather, type StationWeather } from '@/hooks/useStationWeather'
+import { useStationWeather, weatherIcon, type StationWeather } from '@/hooks/useStationWeather'
 import type { Language, Station } from '@/types'
 
-// ── Map palette — pinned to the previous Blue Train values ─────
-const V    = '#0A0F1A'
-const S    = '#0F1E3A'
-const A    = '#C9A84C'
-const T    = '#F0E8D0'
-const D    = '#2A4A6A'
-const MONO = "'DM Mono', 'Courier New', monospace"
+import { formatTemperature, usePreferences, type TemperatureUnit } from '@/lib/preferences'
+import { V, T, A, D, R, MONO } from '@/styles/tokens'
 
 // South African bounds in GeoJSON [lng, lat] format. These are used only for
 // the initial view; the user can still pan and zoom freely afterward.
 const ROUTE_BOUNDS: [[number, number], [number, number]] = [
   [16.0, -35.0],
   [33.0, -22.0],
+]
+
+// Tight box around the stations themselves — used on narrow screens
+const STATION_BOUNDS: [[number, number], [number, number]] = [
+  [Math.min(...STATIONS.map(s => s.lng)), Math.min(...STATIONS.map(s => s.lat))],
+  [Math.max(...STATIONS.map(s => s.lng)), Math.max(...STATIONS.map(s => s.lat))],
 ]
 
 function mapPosition(lng: number, lat: number) {
@@ -40,19 +41,12 @@ interface GoogleMapViewProps {
   onVideoClick?: (s: Station) => void
 }
 
-function weatherIcon(code: number) {
-  if (code === 0) return '☀'
-  if (code <= 3) return '☁'
-  if (code <= 48) return '≋'
-  if (code <= 67) return '☂'
-  return '⚡'
-}
-
 function createStationMarker(
   station: Station,
   isAwoken: boolean,
   isDone: boolean,
   isCurrent: boolean,
+  unit: TemperatureUnit,
   weather?: StationWeather
 ) {
   const element = document.createElement('div')
@@ -78,16 +72,17 @@ function createStationMarker(
     'cursor:pointer',
     'font-family:' + MONO,
     'font-size:' + (station.num.length > 2 ? '8px' : '10px'),
-    'font-weight:700',
+    'font-weight:600',
     'display:flex',
     'align-items:center',
     'justify-content:center',
-    'color:' + (isDone || isAwoken ? V : A),
-    'background:' + (isDone ? A : isAwoken ? '#D4A84C' : S),
-    'border:2px solid ' + (isDone ? '#DDB84E' : isAwoken ? A : D),
+    // Stamped = rust, reached = brass, ahead = cream outlined in brass
+    'color:' + (isDone || isAwoken ? V : D),
+    'background:' + (isDone ? R : isAwoken ? A : V),
+    'border:2px solid ' + (isDone || isAwoken ? V : A),
     'border-radius:50% 50% 50% 0',
     'transform:rotate(-45deg)' + (isCurrent ? ' scale(1.25)' : ''),
-    'box-shadow:0 3px 12px rgba(0,0,0,0.5)',
+    'box-shadow:0 3px 10px rgba(62,35,24,0.3)' + (isCurrent ? ',0 0 0 3px rgba(136,82,61,0.35)' : ''),
     'transition:transform .18s ease',
   ].join(';')
 
@@ -95,9 +90,11 @@ function createStationMarker(
 
   if (weather) {
     const badge = document.createElement('div')
-    badge.textContent = `${weatherIcon(weather.weatherCode)} ${Math.round(weather.maximumTemperature)}° / ${Math.round(weather.temperature)}°  ·  ${weather.precipitation.toFixed(1)}mm  ·  ${Math.round(weather.windSpeed)}km/h`
-    badge.title = `${station.name}: max ${Math.round(weather.maximumTemperature)}°C, rainfall ${weather.precipitation.toFixed(1)}mm, wind ${Math.round(weather.windSpeed)} km/h`
-    badge.style.cssText = 'position:absolute;top:4px;left:-56px;width:112px;box-sizing:border-box;padding:3px 4px;border:1px solid rgba(201,168,76,.55);border-radius:3px;background:rgba(10,15,26,.92);color:#F0E8D0;font:700 8px ' + MONO + ';letter-spacing:.02em;text-align:center;white-space:nowrap;pointer-events:auto;box-shadow:0 2px 8px rgba(0,0,0,.4)'
+    // Compact label (icon + temperature) so neighbouring stations don't collide;
+    // the full reading is in the tooltip.
+    badge.textContent = `${weatherIcon(weather.weatherCode)} ${formatTemperature(weather.temperature, unit, false)}`
+    badge.title = `${station.name}: ${formatTemperature(weather.temperature, unit)} now, max ${formatTemperature(weather.maximumTemperature, unit)}, rainfall ${weather.precipitation.toFixed(1)}mm, wind ${Math.round(weather.windSpeed)} km/h`
+    badge.style.cssText = 'position:absolute;top:-30px;left:14px;box-sizing:border-box;padding:2px 6px;border:1px solid rgba(145,112,67,.45);border-radius:10px;background:rgba(250,244,224,.95);color:' + T + ';font:600 9px ' + MONO + ';letter-spacing:.02em;white-space:nowrap;pointer-events:auto;box-shadow:0 1px 4px rgba(62,35,24,.18)'
     element.appendChild(badge)
   }
 
@@ -111,8 +108,8 @@ function createStationMarker(
 function createTrainMarker() {
   const element = document.createElement('div')
   element.setAttribute('aria-label', 'The Enchanted Line')
-  element.innerHTML = '<svg width="14" height="10" viewBox="0 0 14 10" fill="none"><rect x="0" y="2" width="12" height="5" rx="1.5" fill="#F0E8D0"/><rect x="2" y="0" width="7" height="4" rx="1" fill="#F0E8D0" opacity=".75"/><circle cx="2.5" cy="8" r="1.5" fill="#F0E8D0"/><circle cx="8.5" cy="8" r="1.5" fill="#F0E8D0"/></svg>'
-  element.style.cssText = 'width:28px;height:28px;background:#7a2e1a;border:2px solid #F0E8D0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(122,46,26,.8),0 2px 8px rgba(0,0,0,.6)'
+  element.innerHTML = `<svg width="14" height="10" viewBox="0 0 14 10" fill="none"><rect x="0" y="2" width="12" height="5" rx="1.5" fill="${V}"/><rect x="2" y="0" width="7" height="4" rx="1" fill="${V}" opacity=".75"/><circle cx="2.5" cy="8" r="1.5" fill="${V}"/><circle cx="8.5" cy="8" r="1.5" fill="${V}"/></svg>`
+  element.style.cssText = `width:28px;height:28px;background:${T};border:2px solid ${V};border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(136,82,61,.35),0 2px 8px rgba(62,35,24,.35)`
   return element
 }
 
@@ -133,6 +130,7 @@ export function GoogleMapView({
   const onVideoClickRef = useRef(onVideoClick)
   const [mapReady, setMapReady] = useState(false)
   const { weather } = useStationWeather()
+  const { showMapWeather, temperatureUnit } = usePreferences()
 
   onStationClickRef.current = onStationClick
   onVideoClickRef.current = onVideoClick
@@ -149,8 +147,12 @@ export function GoogleMapView({
   useEffect(() => {
     if (!wrapperRef.current) return
 
+    // Phones get a tighter frame and a collapsed (ⓘ) attribution so the route fills the screen
+    const narrow = wrapperRef.current.clientWidth < 640
+
     const map = new maplibregl.Map({
       container: wrapperRef.current,
+      attributionControl: { compact: narrow },
       style: 'https://tiles.openfreemap.org/styles/liberty',
       center: [24.5, -30.5],
       zoom: 4.5,
@@ -163,8 +165,9 @@ export function GoogleMapView({
     map.on('load', () => {
       setMapReady(true)
       try {
-        map.fitBounds(ROUTE_BOUNDS, {
-          padding: 80,
+        map.fitBounds(narrow ? STATION_BOUNDS : ROUTE_BOUNDS, {
+          // extra room on the right for the weather tags beside each pin
+          padding: narrow ? { top: 48, bottom: 48, left: 32, right: 72 } : 80,
           duration: 0,
         })
       } catch {
@@ -219,7 +222,7 @@ export function GoogleMapView({
         type: 'line',
         source: 'full-route',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': A, 'line-opacity': 0.3, 'line-width': 3, 'line-dasharray': [2, 2] },
+        paint: { 'line-color': A, 'line-opacity': 0.55, 'line-width': 3, 'line-dasharray': [2, 2] },
       })
       map.addSource('travelled-route', { type: 'geojson', data: routeData(travelledRoute) })
       map.addLayer({
@@ -227,7 +230,7 @@ export function GoogleMapView({
         type: 'line',
         source: 'travelled-route',
         layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: { 'line-color': A, 'line-opacity': 0.95, 'line-width': 5 },
+        paint: { 'line-color': R, 'line-opacity': 0.95, 'line-width': 5 },
       })
     } else {
       fullSource.setData(routeData(route))
@@ -259,7 +262,8 @@ export function GoogleMapView({
           awoken.has(station.id),
           completed.has(station.id),
           station.id === current.id,
-          weatherData
+          temperatureUnit,
+          showMapWeather ? weatherData : undefined,
         ),
         anchor: 'center',
       })
@@ -276,13 +280,13 @@ export function GoogleMapView({
 
       return marker
     })
-  }, [mapReady, stIdx, awoken, completed, lang, current.id, weather])
+  }, [mapReady, stIdx, awoken, completed, lang, current.id, weather, showMapWeather, temperatureUnit])
 
   return (
     <div ref={wrapperRef} style={{ position: 'absolute', inset: 0 }}>
       {!mapReady && (
-        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: T, background: '#0A0F1A' }}>
-          Loading map...
+        <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: D, background: V, fontFamily: MONO, fontWeight: 500, fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+          Loading map…
         </div>
       )}
     </div>

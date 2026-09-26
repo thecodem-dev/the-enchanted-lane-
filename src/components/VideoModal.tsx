@@ -1,4 +1,6 @@
 import { STATION_VIDEOS } from '@/data/videos'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { usePreferences } from '@/lib/preferences'
 import { V, S, T, A, D, R, DISPLAY, TEXT_F, MONO } from '@/styles/tokens'
 import type { Station } from '@/types'
 
@@ -27,6 +29,8 @@ export function VideoModal({
   hasNext,
 }: VideoModalProps) {
   const vid = STATION_VIDEOS[station.id]
+  const isMobile = useIsMobile()
+  const { autoplayVideos } = usePreferences()
 
   return (
     <div
@@ -35,13 +39,13 @@ export function VideoModal({
         position: 'fixed', inset: 0, zIndex: 400,
         background: 'rgba(62,35,24,0.45)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: 24,
+        padding: isMobile ? 12 : 24,
       }}
     >
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          width: '100%', maxWidth: 820,
+          width: '100%', maxWidth: 820, maxHeight: '100%', overflowY: 'auto',
           background: V, borderRadius: 10,
           overflow: 'hidden',
           border: `1px solid rgba(145,112,67,0.33)`,
@@ -62,7 +66,7 @@ export function VideoModal({
             }}>
               Chapter {station.num} · {station.terrain}
             </div>
-            <div style={{ fontFamily: DISPLAY, fontSize: 32, fontWeight: 400, color: T, lineHeight: 1 }}>
+            <div style={{ fontFamily: DISPLAY, fontSize: isMobile ? 26 : 32, fontWeight: 400, color: T, lineHeight: 1 }}>
               {vid?.title ?? station.names.en}
             </div>
             <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 14, color: D, marginTop: 3 }}>
@@ -87,7 +91,7 @@ export function VideoModal({
         <div style={{ position: 'relative', paddingBottom: '52%', background: S }}>
           {vid ? (
             <iframe
-              src={`https://www.youtube.com/embed/${vid.videoId}?autoplay=1&rel=0&modestbranding=1&color=white`}
+              src={`https://www.youtube.com/embed/${vid.videoId}?autoplay=${autoplayVideos ? 1 : 0}&rel=0&modestbranding=1&color=white`}
               title={vid.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -103,7 +107,7 @@ export function VideoModal({
                 <circle cx="24" cy="24" r="22" stroke={A} strokeWidth="1.5" fill="none" />
                 <polygon points="19,16 35,24 19,32" fill={A} />
               </svg>
-              <div style={{ fontFamily: TEXT_F, fontSize: 15, fontWeight: 500, color: `rgba(62,35,24,0.6)` }}>
+              <div style={{ fontFamily: DISPLAY, fontSize: 26, fontWeight: 400, color: T }}>
                 Video coming soon
               </div>
               <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 13, color: D }}>
@@ -116,7 +120,7 @@ export function VideoModal({
         {/* Station info */}
         <div style={{
           padding: '14px 22px 18px',
-          display: 'flex', gap: 24, alignItems: 'flex-start',
+          display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 16 : 24, alignItems: 'flex-start',
         }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
@@ -129,7 +133,7 @@ export function VideoModal({
               {station.heritage.slice(0, 220)}…
             </p>
           </div>
-          <div style={{ width: 160, flexShrink: 0 }}>
+          <div style={{ width: isMobile ? 'auto' : 160, flexShrink: 0 }}>
             <div style={{
               fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.14em',
               color: R, textTransform: 'uppercase', marginBottom: 6,

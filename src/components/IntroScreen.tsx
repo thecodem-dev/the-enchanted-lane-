@@ -1,5 +1,5 @@
 import { LANGUAGES, CONDUCTOR_GREETING } from '@/data/stations'
-import { ArtDecoOrnament } from '@/components/ui/ArtDecoOrnament'
+import { Logo } from '@/components/ui/Logo'
 import { CornerOrnament } from '@/components/ui/CornerOrnament'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import type { Language } from '@/types'
@@ -62,7 +62,7 @@ export function IntroScreen({ lang, setLang, onBegin }: IntroScreenProps) {
           maxHeight: '100dvh',
         }}
       >
-        <ArtDecoOrnament />
+        <Logo className="mb-5 h-24 w-24 ring-1 ring-brass/50 shadow-[0_8px_24px_rgba(62,35,24,0.18)]" />
 
         {/* Ticket */}
         <div
@@ -148,9 +148,9 @@ export function IntroScreen({ lang, setLang, onBegin }: IntroScreenProps) {
           width: '100%',
         }}>
           <div style={{
-            fontFamily: SANS, fontStyle: 'italic',
-            fontSize: isMobile ? 12 : 13, color: D,
-            marginBottom: 12, letterSpacing: '0.06em',
+            fontFamily: DISPLAY, fontWeight: 400,
+            fontSize: isMobile ? 22 : 26, color: T,
+            marginBottom: 14, lineHeight: 1.1,
           }}>
             Which tongue shall the conductor speak?
           </div>

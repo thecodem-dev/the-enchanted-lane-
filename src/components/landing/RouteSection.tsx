@@ -96,7 +96,7 @@ export function RouteSection() {
                   }
                 >
                   <span className="text-eyebrow text-brass">{label}</span>
-                  <h3 className="text-h3 mt-2 truncate">{station.name}</h3>
+                  <h3 className="mt-2 truncate font-display text-[26px] leading-[1.1] font-normal">{station.name}</h3>
                   <p className="text-espresso/75 italic">{station.subtitle}</p>
                 </TicketStub>
               </li>
@@ -110,7 +110,7 @@ export function RouteSection() {
               className="group flex h-[168px] w-[220px] flex-col justify-center rounded-[3px] border border-dashed border-espresso/40 bg-tan px-6 text-espresso transition-colors hover:border-rust hover:bg-cream"
             >
               <span className="text-eyebrow text-brass">Unpunched</span>
-              <span className="text-h3 mt-2">This one's yours</span>
+              <span className="mt-2 font-display text-[26px] leading-[1.1]">This one's yours</span>
               <span className="text-label mt-3 inline-flex items-center gap-2 text-rust">
                 Claim it <ArrowRight size={14} strokeWidth={1.75} className="transition-transform group-hover:translate-x-1" />
               </span>

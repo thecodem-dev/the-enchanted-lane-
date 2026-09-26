@@ -69,7 +69,7 @@ export function Features() {
                 <span className="text-eyebrow text-espresso/60">Exhibit {exhibit}</span>
               </div>
 
-              <h3 className="text-h3 mt-6 max-w-sm">{title}</h3>
+              <h3 className="mt-6 max-w-sm font-display text-[28px] leading-[1.1] font-normal">{title}</h3>
               <p className="mt-3 max-w-md text-espresso/80">{body}</p>
               <p className="mt-5 flex max-w-md gap-3 text-[14px] text-rust italic">
                 <span className="mt-[11px] h-px w-5 shrink-0 bg-rust/60" aria-hidden="true" />

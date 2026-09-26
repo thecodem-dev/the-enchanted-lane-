@@ -1,3 +1,4 @@
+import { shortStationName } from '@/data/stations'
 import { WaxSeal } from '@/components/ui/WaxSeal'
 import type { Language, Station } from '@/types'
 
@@ -87,7 +88,7 @@ export function RouteProgress({
                   textTransform: 'uppercase', whiteSpace: 'nowrap',
                   opacity: isAwoken ? 1 : 0.45,
                 }}>
-                  {s.names[lang].split(' ')[0]}
+                  {shortStationName(s.names[lang])}
                 </span>
               )}
             </div>

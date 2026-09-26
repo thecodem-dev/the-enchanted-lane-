@@ -1,8 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { STATIONS } from '@/data/stations'
+import { usePreferences, type TrainSpeed } from '@/lib/preferences'
 import type { Station } from '@/types'
 
-const ANIMATION_SPEED = 1 / 420 // ~7 seconds per segment at 60 fps
+/** Progress per frame for each Settings › Train speed option (at 60 fps) */
+const SPEEDS: Record<TrainSpeed, number> = {
+  leisurely: 1 / 720, // ~12 s per segment
+  standard:  1 / 420, // ~7 s
+  express:   1 / 180, // ~3 s
+}
 
 interface UseTrainAnimationReturn {
   stIdx: number
@@ -14,6 +20,8 @@ interface UseTrainAnimationReturn {
   newlyAwoken: string | null
   setActiveStation: (s: Station | null) => void
   handleContinue: () => void
+  /** Back to Pretoria with no stamps — used by Settings and on sign-out */
+  resetJourney: () => void
 }
 
 /**
@@ -43,6 +51,11 @@ export function useTrainAnimation(): UseTrainAnimationReturn {
   useEffect(() => { progressRef.current = tProg }, [tProg])
   useEffect(() => { movingRef.current = isMoving }, [isMoving])
 
+  // Read inside the rAF loop, so a speed change applies mid-segment
+  const { trainSpeed } = usePreferences()
+  const speedRef = useRef(SPEEDS[trainSpeed])
+  useEffect(() => { speedRef.current = SPEEDS[trainSpeed] }, [trainSpeed])
+
   useEffect(() => {
     if (!isMoving) return
 
@@ -51,7 +64,7 @@ export function useTrainAnimation(): UseTrainAnimationReturn {
     const tick = () => {
       if (!movingRef.current) return
 
-      const next = progressRef.current + ANIMATION_SPEED
+      const next = progressRef.current + speedRef.current
 
       if (next >= 1) {
         movingRef.current = false
@@ -90,6 +103,19 @@ export function useTrainAnimation(): UseTrainAnimationReturn {
     setIsMoving(true)
   }, [isMoving, stIdx])
 
+  const resetJourney = useCallback(() => {
+    movingRef.current = false
+    progressRef.current = 0
+    stIdxRef.current = 0
+    setIsMoving(false)
+    setTProg(0)
+    setStIdx(0)
+    setAwoken(new Set(['pretoria']))
+    setCompleted(new Set())
+    setActiveStation(STATIONS[0] ?? null)
+    setNewlyAwoken(null)
+  }, [])
+
   return {
     stIdx,
     tProg,
@@ -100,5 +126,6 @@ export function useTrainAnimation(): UseTrainAnimationReturn {
     newlyAwoken,
     setActiveStation,
     handleContinue,
+    resetJourney,
   }
 }

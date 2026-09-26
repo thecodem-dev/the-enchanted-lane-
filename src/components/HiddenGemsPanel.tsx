@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react'
+import { Building2, Castle, Clock, FlaskConical, Hourglass, Landmark, Palette, Phone, Trees, Users, type LucideIcon } from 'lucide-react'
 import { STATIONS } from '@/data/stations'
 import {
   ATTRACTIONS,
@@ -7,6 +8,8 @@ import {
   type Attraction,
   type AttractionCategory,
 } from '@/data/attractions'
+import { ATTRACTION_PHOTOS } from '@/data/attractionPhotos'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import type { Language } from '@/types'
 
 import { V as VOID, S as SURFACE, T as TEXT, A as ACCENT, G as SUPPORT, D as DIM, RV as REVEAL, R, INK, DISPLAY, TEXT_F, MONO } from '@/styles/tokens'
@@ -130,6 +133,8 @@ interface BookingForm { name: string; email: string; date: string; guests: strin
 const EMPTY: BookingForm = { name: '', email: '', date: '', guests: '1', notes: '' }
 
 function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attraction; isUpcoming: boolean; onClose: () => void }) {
+  const isMobile = useIsMobile()
+  const px = isMobile ? 18 : 28
   const [form, setForm] = useState<BookingForm>(EMPTY)
   const [submitted, setSubmitted] = useState(false)
 
@@ -173,13 +178,22 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
           </div>
         ) : (
           <>
+            {/* ── Photo banner ── */}
+            {ATTRACTION_PHOTOS[attraction.id] && (
+              <img
+                src={ATTRACTION_PHOTOS[attraction.id]}
+                alt={attraction.name}
+                style={{ width: '100%', height: 180, objectFit: 'cover', flexShrink: 0, display: 'block' }}
+              />
+            )}
+
             {/* ── Header ── */}
-            <div style={{ padding: '22px 28px 16px', borderBottom: `1px solid rgba(62,35,24,0.09)`, flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div style={{ padding: `22px ${px}px 16px`, borderBottom: `1px solid rgba(62,35,24,0.09)`, flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.18em', color: R, textTransform: 'uppercase', marginBottom: 5 }}>
                   {isUpcoming ? 'Advance claim' : "You're claiming"}
                 </div>
-                <div style={{ fontFamily: TEXT_F, fontSize: 19, fontWeight: 600, color: TEXT, lineHeight: 1.25 }}>{attraction.name}</div>
+                <div style={{ fontFamily: DISPLAY, fontSize: 30, fontWeight: 400, color: TEXT, lineHeight: 1.05 }}>{attraction.name}</div>
                 <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 14, color: DIM, marginTop: 3 }}>{attraction.tagline}</div>
               </div>
               <button onClick={onClose} aria-label="Close" style={{ background: 'rgba(62,35,24,0.06)', border: '1px solid rgba(62,35,24,0.12)', borderRadius: '50%', width: 32, height: 32, cursor: 'pointer', color: DIM, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>×</button>
@@ -187,7 +201,7 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
 
             {/* ── Upcoming notice ── */}
             {isUpcoming && (
-              <div style={{ margin: '14px 28px 0', padding: '11px 14px', borderRadius: 8, background: `rgba(166,169,154,0.2)`, border: `1px solid rgba(166,169,154,0.55)`, display: 'flex', gap: 10, alignItems: 'flex-start', flexShrink: 0 }}>
+              <div style={{ margin: `14px ${px}px 0`, padding: '11px 14px', borderRadius: 8, background: `rgba(166,169,154,0.2)`, border: `1px solid rgba(166,169,154,0.55)`, display: 'flex', gap: 10, alignItems: 'flex-start', flexShrink: 0 }}>
                 <span style={{ fontFamily: TEXT_F, fontSize: 14, color: TEXT, lineHeight: 1.55 }}>
                   The train hasn't reached this stop yet. Book ahead and the venue will hold your spot.
                 </span>
@@ -195,7 +209,7 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
             )}
 
             {/* ── Summary tiles ── */}
-            <div style={{ display: 'flex', margin: '14px 28px 0', gap: 8, flexShrink: 0 }}>
+            <div style={{ display: 'flex', margin: `14px ${px}px 0`, gap: 8, flexShrink: 0 }}>
               {[
                 { label: 'Entry', value: attraction.priceZAR === 0 ? 'Free' : `R${attraction.priceZAR} p.p.` },
                 { label: 'Duration', value: attraction.duration },
@@ -209,12 +223,12 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
             </div>
 
             {/* ── Form ── */}
-            <form onSubmit={e => { e.preventDefault(); setSubmitted(true) }} style={{ flex: 1, overflowY: 'auto', padding: '18px 28px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <form onSubmit={e => { e.preventDefault(); setSubmitted(true) }} style={{ flex: 1, overflowY: 'auto', padding: `18px ${px}px 0`, display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
                 <div><label style={lbl}>Full name</label><input required style={inp} placeholder="Your name" {...field('name')} onFocus={e => { e.currentTarget.style.borderColor = `rgba(145,112,67,0.59)` }} onBlur={e => { e.currentTarget.style.borderColor = 'rgba(62,35,24,0.14)' }} /></div>
                 <div><label style={lbl}>Email</label><input required type="email" style={inp} placeholder="you@email.com" {...field('email')} onFocus={e => { e.currentTarget.style.borderColor = `rgba(145,112,67,0.59)` }} onBlur={e => { e.currentTarget.style.borderColor = 'rgba(62,35,24,0.14)' }} /></div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
                 <div><label style={lbl}>Visit date</label><input required type="date" style={inp} {...field('date')} onFocus={e => { e.currentTarget.style.borderColor = `rgba(145,112,67,0.59)` }} onBlur={e => { e.currentTarget.style.borderColor = 'rgba(62,35,24,0.14)' }} /></div>
                 <div><label style={lbl}>Guests</label>
                   <select required style={{ ...inp, cursor: 'pointer' }} {...field('guests')}>
@@ -267,12 +281,9 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
 // Gem entry — the journal row
 // ─────────────────────────────────────────────────────────────────
 
-function categoryIcon(cat: AttractionCategory): string {
-  const map: Record<AttractionCategory, string> = {
-    history: '⌛', museum: '🏛', nature: '◈', heritage: '◉',
-    arts: '◐', science: '◎', township: '◍', architecture: '◆',
-  }
-  return map[cat] ?? '◆'
+const CATEGORY_ICONS: Record<AttractionCategory, LucideIcon> = {
+  history: Hourglass, museum: Landmark, nature: Trees, heritage: Castle,
+  arts: Palette, science: FlaskConical, township: Users, architecture: Building2,
 }
 
 function GemEntry({
@@ -286,6 +297,9 @@ function GemEntry({
   const [hovered, setHovered] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const catColour = CATEGORY_COLOURS[attraction.category]
+  const CategoryIcon = CATEGORY_ICONS[attraction.category]
+  const photo = ATTRACTION_PHOTOS[attraction.id]
+  const isMobile = useIsMobile()
 
   const isFree   = attraction.priceZAR === 0
   const hasUrl   = !!attraction.bookingInfo.url
@@ -296,7 +310,7 @@ function GemEntry({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex', gap: 0,
+        display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 0,
         background: hovered ? REVEAL : SURFACE,
         borderRadius: 6,
         overflow: 'hidden',
@@ -304,34 +318,59 @@ function GemEntry({
         animation: `gemDrop 0.28s ease-out ${index * 60}ms both`,
       }}
     >
-      {/* ── Left art panel (120px) ── */}
+      {/* ── Left art panel (200px): photo when we have one, else the category motif ── */}
       <div style={{
-        width: 120, flexShrink: 0, position: 'relative',
+        width: isMobile ? '100%' : 200, minHeight: isMobile ? 180 : 170, flexShrink: 0, position: 'relative',
         background: `linear-gradient(160deg, ${VOID} 0%, rgba(166,169,154,0.35) 100%)`,
         overflow: 'hidden',
       }}>
+        {photo ? (
+          <>
+            <img
+              src={photo}
+              alt={attraction.name}
+              loading="lazy"
+              decoding="async"
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+                transform: hovered ? 'scale(1.04)' : 'none', transition: 'transform 0.4s ease',
+              }}
+            />
+            {/* Espresso wash so the label reads over any photo */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(62,35,24,0.78) 0%, rgba(62,35,24,0) 55%)' }} />
+            <div style={{ position: 'absolute', left: 14, bottom: 10, display: 'flex', alignItems: 'center', gap: 6, color: VOID }}>
+              <CategoryIcon size={13} strokeWidth={1.6} aria-hidden="true" />
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.16em', textTransform: 'uppercase' }}>
+                {CATEGORY_LABELS[attraction.category]}
+              </span>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Grid pattern */}
+            <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.12 }} viewBox="0 0 120 140" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <pattern id={`g-${attraction.id}`} width="16" height="16" patternUnits="userSpaceOnUse">
+                  <path d="M16 0L0 0 0 16" fill="none" stroke={catColour} strokeWidth="0.5" />
+                </pattern>
+              </defs>
+              <rect width="120" height="140" fill={`url(#g-${attraction.id})`} />
+            </svg>
+            {/* Central symbol */}
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <CategoryIcon size={24} strokeWidth={1.4} color={catColour} aria-hidden="true" />
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.16em', color: catColour, textTransform: 'uppercase' }}>
+                {CATEGORY_LABELS[attraction.category]}
+              </span>
+            </div>
+          </>
+        )}
         {/* Category accent strip */}
         <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: 3, background: catColour, opacity: 0.9 }} />
-        {/* Grid pattern */}
-        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.12 }} viewBox="0 0 120 140" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <pattern id={`g-${attraction.id}`} width="16" height="16" patternUnits="userSpaceOnUse">
-              <path d="M16 0L0 0 0 16" fill="none" stroke={catColour} strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="120" height="140" fill={`url(#g-${attraction.id})`} />
-        </svg>
-        {/* Central symbol */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <span style={{ fontSize: 22, opacity: 0.45 }}>{categoryIcon(attraction.category)}</span>
-          <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.16em', color: catColour, textTransform: 'uppercase' }}>
-            {CATEGORY_LABELS[attraction.category]}
-          </span>
-        </div>
-        {/* Free badge */}
+        {/* Free badge — top-left over a photo, bottom-left otherwise */}
         {isFree && (
-          <div style={{ position: 'absolute', bottom: 10, left: 12 }}>
-            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.1em', textTransform: 'uppercase', color: TEXT, background: `rgba(166,169,154,0.3)`, border: `1px solid rgba(166,169,154,0.7)`, borderRadius: 3, padding: '2px 7px' }}>Free</span>
+          <div style={{ position: 'absolute', left: 12, ...(photo ? { top: 10 } : { bottom: 10 }) }}>
+            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.1em', textTransform: 'uppercase', color: TEXT, background: photo ? VOID : `rgba(166,169,154,0.3)`, border: `1px solid rgba(166,169,154,0.7)`, borderRadius: 3, padding: '2px 7px' }}>Free</span>
           </div>
         )}
         {/* Upcoming ribbon */}
@@ -343,11 +382,11 @@ function GemEntry({
       </div>
 
       {/* ── Right: journal text ── */}
-      <div style={{ flex: 1, padding: '18px 20px 16px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, padding: isMobile ? '16px 16px 14px' : '18px 20px 16px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
         {/* Name + price */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4 }}>
-          <h3 style={{ fontFamily: TEXT_F, fontSize: 18, fontWeight: 600, color: TEXT, margin: 0, lineHeight: 1.3, flex: 1 }}>
+          <h3 style={{ fontFamily: DISPLAY, fontSize: 26, fontWeight: 400, color: TEXT, margin: 0, lineHeight: 1.1, flex: 1 }}>
             {attraction.name}
           </h3>
           {!isFree && (
@@ -376,7 +415,7 @@ function GemEntry({
 
         {/* Expanded: highlights + practical info */}
         {expanded && (
-          <div style={{ marginBottom: 12, display: 'flex', gap: 20 }}>
+          <div style={{ marginBottom: 12, display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 12 : 20 }}>
             {/* Highlights */}
             <div style={{ flex: 1 }}>
               {attraction.highlights.map((h, i) => (
@@ -387,11 +426,15 @@ function GemEntry({
               ))}
             </div>
             {/* Practical */}
-            <div style={{ width: 160, flexShrink: 0 }}>
+            <div style={{ width: isMobile ? 'auto' : 160, flexShrink: 0 }}>
               <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.15em', color: DIM, textTransform: 'uppercase', marginBottom: 6 }}>Practical</div>
-              <div style={{ fontFamily: TEXT_F, fontSize: 13, color: DIM, lineHeight: 1.8 }}>
-                🕐 {attraction.openingHours}<br />
-                📞 {attraction.bookingInfo.contact}
+              <div style={{ fontFamily: TEXT_F, fontSize: 13, color: DIM, lineHeight: 1.6, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                  <Clock size={13} strokeWidth={1.5} style={{ flexShrink: 0, marginTop: 3 }} aria-hidden="true" />{attraction.openingHours}
+                </span>
+                <span style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                  <Phone size={13} strokeWidth={1.5} style={{ flexShrink: 0, marginTop: 3 }} aria-hidden="true" />{attraction.bookingInfo.contact}
+                </span>
               </div>
               {attraction.bookingInfo.url && (
                 <a href={attraction.bookingInfo.url} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', marginTop: 6, fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.1em', color: TEXT, textDecoration: 'none', borderBottom: `1px solid rgba(145,112,67,0.65)`, paddingBottom: 1 }}>
@@ -403,7 +446,7 @@ function GemEntry({
         )}
 
         {/* Metadata row + action */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 'auto', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
             <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, color: DIM, letterSpacing: '0.06em' }}>
               {isFree ? <span style={{ color: TEXT, fontWeight: 600 }}>Free entry</span> : `R${attraction.priceZAR} p.p.`}
@@ -517,7 +560,7 @@ function StationSection({
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: TEXT_F, fontSize: 17, fontWeight: 600, color: isVisited ? TEXT : `rgba(62,35,24,0.4)`, letterSpacing: '-0.01em' }}>
+            <span style={{ fontFamily: DISPLAY, fontSize: 28, fontWeight: 400, color: isVisited ? TEXT : `rgba(62,35,24,0.45)`, lineHeight: 1 }}>
               {station.names[lang]}
             </span>
             <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.14em', color: DIM, textTransform: 'uppercase' }}>
@@ -585,11 +628,12 @@ function FilterDrawer({
   onCategoryChange: (c: CatFilter) => void
   onClose: () => void
 }) {
+  const isMobile = useIsMobile()
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(62,35,24,0.45)' }}>
-      <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, right: 0, width: 340, height: '100%', background: VOID, borderLeft: `1px solid rgba(62,35,24,0.08)`, padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: 28, overflowY: 'auto', animation: 'slideInRight 0.22s ease-out both' }}>
+      <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, right: 0, width: isMobile ? '100%' : 340, height: '100%', background: VOID, borderLeft: `1px solid rgba(62,35,24,0.08)`, padding: isMobile ? '20px 18px' : '24px 28px', display: 'flex', flexDirection: 'column', gap: 28, overflowY: 'auto', animation: 'slideInRight 0.22s ease-out both' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontFamily: TEXT_F, fontSize: 18, fontWeight: 600, color: TEXT }}>Filters</span>
+          <span style={{ fontFamily: DISPLAY, fontSize: 30, fontWeight: 400, color: TEXT, lineHeight: 1 }}>Filters</span>
           <button onClick={onClose} style={{ background: 'rgba(62,35,24,0.06)', border: '1px solid rgba(62,35,24,0.12)', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', color: DIM, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
         </div>
 
@@ -627,6 +671,7 @@ function FilterDrawer({
 // ─────────────────────────────────────────────────────────────────
 
 export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
+  const isMobile = useIsMobile()
   const [priceRange, setPriceRange] = useState<[number, number]>([PRICE_MIN, PRICE_MAX])
   const [categoryFilter, setCategoryFilter] = useState<CatFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -650,7 +695,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
     <div style={{ fontFamily: TEXT_F, background: VOID, minHeight: '100%' }}>
 
       {/* ══ Page header ══ */}
-      <div style={{ padding: '28px 36px 22px', borderBottom: `1px solid rgba(166,169,154,0.4)` }}>
+      <div style={{ padding: isMobile ? '20px 16px 16px' : '28px 36px 22px', borderBottom: `1px solid rgba(166,169,154,0.4)` }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 20, marginBottom: 18 }}>
           <div>
             {/* Eyebrow */}
@@ -662,7 +707,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
                 Hidden Gems
               </span>
             </div>
-            <h2 style={{ fontFamily: DISPLAY, fontSize: 40, fontWeight: 400, color: TEXT, margin: '0 0 8px', lineHeight: 1 }}>
+            <h2 style={{ fontFamily: DISPLAY, fontSize: isMobile ? 32 : 40, fontWeight: 400, color: TEXT, margin: '0 0 8px', lineHeight: 1 }}>
               What most passengers miss
             </h2>
             <p style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 16, color: DIM, margin: 0, lineHeight: 1.5 }}>
@@ -671,7 +716,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
           </div>
           {totalUnlocked > 0 && (
             <div style={{ flexShrink: 0, textAlign: 'right', paddingTop: 4 }}>
-              <div style={{ fontFamily: TEXT_F, fontSize: 26, fontWeight: 600, color: TEXT, lineHeight: 1 }}>{totalUnlocked}</div>
+              <div style={{ fontFamily: DISPLAY, fontSize: 40, fontWeight: 400, color: TEXT, lineHeight: 1 }}>{totalUnlocked}</div>
               <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 8, color: R, letterSpacing: '0.14em', textTransform: 'uppercase', marginTop: 3, lineHeight: 1.5 }}>spots<br />unlocked</div>
             </div>
           )}
@@ -715,7 +760,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
       </div>
 
       {/* ══ Journal body ══ */}
-      <div style={{ padding: '28px 36px 56px' }}>
+      <div style={{ padding: isMobile ? '20px 16px 32px' : '28px 36px 56px' }}>
         {STATIONS.map(s => {
           const entries = byStation.get(s.id) ?? []
           if (entries.length === 0) return null

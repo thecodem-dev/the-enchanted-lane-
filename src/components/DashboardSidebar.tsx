@@ -1,6 +1,7 @@
-import { S, T, A, D, R, DISPLAY, SANS, MONO } from '@/styles/tokens'
+import { Logo } from '@/components/ui/Logo'
+import { V, S, T, D, R, DISPLAY, SANS, MONO } from '@/styles/tokens'
 
-export type NavItem = 'map' | 'passport' | 'gems' | 'quiz' | 'rhino' | 'settings'
+export type NavItem = 'map' | 'passport' | 'gems' | 'quiz' | 'thema' | 'settings'
 
 interface DashboardSidebarProps {
   awoken: Set<string>
@@ -12,7 +13,22 @@ interface DashboardSidebarProps {
 interface NavEntry {
   id: NavItem
   label: string
+  /** Label for the phone's bottom bar */
+  short: string
   badge?: string | undefined
+}
+
+/** The journey's pages — shared by the desktop sidebar and the mobile bottom bar */
+function buildNav(completed: Set<string>, awoken: Set<string>): NavEntry[] {
+  const quizUnlocked = awoken.size >= 1
+  return [
+    { id: 'map',      label: 'Journey Map',     short: 'Map' },
+    { id: 'passport', label: 'Passport Stamps', short: 'Passport', badge: completed.size > 0 ? String(completed.size) : undefined },
+    { id: 'gems',     label: 'Hidden Gems',     short: 'Gems',     badge: awoken.size > 0 ? String(awoken.size) : undefined },
+    { id: 'quiz',     label: 'Quiz',            short: 'Quiz',     badge: quizUnlocked ? undefined : 'locked' },
+    { id: 'thema',    label: 'Talk to Thema',   short: 'Thema' },
+    { id: 'settings', label: 'Settings',        short: 'Settings' },
+  ]
 }
 
 function SidebarIcon({ id, active }: { id: NavItem; active: boolean }) {
@@ -50,7 +66,7 @@ function SidebarIcon({ id, active }: { id: NavItem; active: boolean }) {
           <text x="8" y="12" textAnchor="middle" fill={c} fontSize="8" fontFamily={MONO}>?</text>
         </svg>
       )
-    case 'rhino':
+    case 'thema':
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <ellipse cx="7" cy="10" rx="5" ry="3.5" stroke={c} strokeWidth="1.2" />
@@ -88,15 +104,7 @@ export function DashboardSidebar({
   onNavChange,
 }: DashboardSidebarProps) {
   const quizUnlocked = awoken.size >= 1
-
-  const nav: NavEntry[] = [
-    { id: 'map',      label: 'Journey Map' },
-    { id: 'passport', label: 'Passport Stamps', badge: completed.size > 0 ? String(completed.size) : undefined },
-    { id: 'gems',     label: 'Hidden Gems',     badge: awoken.size > 0 ? String(awoken.size) : undefined },
-    { id: 'quiz',     label: 'Quiz',            badge: quizUnlocked ? undefined : 'locked' },
-    { id: 'rhino',    label: 'Talk to Rhino' },
-    { id: 'settings', label: 'Settings' },
-  ]
+  const nav = buildNav(completed, awoken)
 
   return (
     <div style={{
@@ -114,12 +122,10 @@ export function DashboardSidebar({
         flexShrink: 0,
         background: `linear-gradient(180deg, rgba(145,112,67,0.08) 0%, transparent 100%)`,
       }}>
-        {/* Gold rule above brand */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        {/* Logo, flanked by the brass rule */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to right, transparent, rgba(145,112,67,0.65))` }} />
-          <svg width="6" height="6" viewBox="0 0 6 6">
-            <rect x="0" y="0" width="6" height="6" fill={A} opacity="0.8" transform="rotate(45 3 3)" />
-          </svg>
+          <Logo className="h-16 w-16 ring-1 ring-brass/50" />
           <div style={{ flex: 1, height: 1, background: `linear-gradient(to left, transparent, rgba(145,112,67,0.65))` }} />
         </div>
         <div style={{
@@ -213,5 +219,57 @@ export function DashboardSidebar({
         </div>
       </div>
     </div>
+  )
+}
+
+/**
+ * MobileNavBar — the sidebar's pages as a bottom tab bar for phones.
+ */
+export function MobileNavBar({ completed, awoken, activeNav, onNavChange }: DashboardSidebarProps) {
+  const nav = buildNav(completed, awoken)
+  return (
+    <nav
+      aria-label="Main menu"
+      style={{
+        flexShrink: 0, display: 'grid', gridTemplateColumns: `repeat(${nav.length}, 1fr)`,
+        background: S, borderTop: '1px solid rgba(145,112,67,0.23)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
+      {nav.map(item => {
+        const isActive = activeNav === item.id
+        const locked = item.badge === 'locked'
+        return (
+          <button
+            key={item.id}
+            onClick={() => onNavChange(item.id)}
+            aria-current={isActive ? 'page' : undefined}
+            aria-label={item.label}
+            style={{
+              position: 'relative', minHeight: 56, padding: '8px 2px 7px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+              background: isActive ? 'rgba(145,112,67,0.13)' : 'transparent',
+              border: 'none', borderTop: `2px solid ${isActive ? R : 'transparent'}`,
+              cursor: 'pointer', opacity: locked ? 0.5 : 1,
+            }}
+          >
+            <SidebarIcon id={item.id} active={isActive} />
+            <span style={{ fontFamily: SANS, fontSize: 10, fontWeight: isActive ? 600 : 500, color: isActive ? T : D, lineHeight: 1 }}>
+              {item.short}
+            </span>
+            {item.badge && !locked && (
+              <span style={{
+                position: 'absolute', top: 5, left: 'calc(50% + 7px)',
+                minWidth: 15, height: 15, borderRadius: 8, padding: '0 4px',
+                background: R, color: V, fontFamily: MONO, fontSize: 9, fontWeight: 600,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {item.badge}
+              </span>
+            )}
+          </button>
+        )
+      })}
+    </nav>
   )
 }

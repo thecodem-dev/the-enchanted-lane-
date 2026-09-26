@@ -29,8 +29,10 @@ export function ChapterPanel({
 
   const panelStyle: React.CSSProperties = isMobile
     ? {
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        maxHeight: '70dvh', zIndex: 100,
+        // Sits above the mobile bottom tab bar (56px + safe area) so navigation stays reachable
+        position: 'fixed', bottom: 'calc(56px + env(safe-area-inset-bottom))', left: 0, right: 0,
+        maxHeight: '62dvh', zIndex: 100,
+        boxShadow: '0 -8px 24px rgba(62,35,24,0.14)',
         borderTop: `1px solid rgba(145,112,67,0.39)`,
         borderLeft: 'none',
         borderRadius: '12px 12px 0 0',
@@ -174,8 +176,8 @@ export function ChapterPanel({
       }}>
         {isComplete ? (
           <div style={{
-            textAlign: 'center', fontFamily: SANS,
-            fontStyle: 'italic', fontSize: 14, color: T, lineHeight: 1.6,
+            textAlign: 'center', fontFamily: DISPLAY,
+            fontSize: 24, fontWeight: 400, color: T, lineHeight: 1.3,
           }}>
             You have completed the journey.
             <br />
