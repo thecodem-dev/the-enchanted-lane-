@@ -54,5 +54,10 @@ Uses **Tailwind CSS v4** loaded via the Vite plugin — no PostCSS config needed
 Copy `.env.example` to `.env` and fill in values before running:
 
 ```
-VITE_GOOGLE_MAPS_API_KEY=your_key_here
+VITE_API_URL=http://localhost:5000
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_publishable_or_anon_key
 ```
+
+Only `VITE_` variables are client-visible. Keep service-role keys, signing
+secrets, and other privileged credentials in server environment variables.

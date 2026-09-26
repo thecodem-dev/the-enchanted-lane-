@@ -12,6 +12,8 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
+app.disable('x-powered-by');
+
 const encoder = new TextEncoder();
 const toBase64 = (bytes: Uint8Array) => Buffer.from(bytes).toString('base64');
 const signingKeys = ml_dsa65.keygen();
@@ -34,11 +36,20 @@ function createTelemetry() {
 app.use(helmet());
 
 // 2. Strict CORS Configuration
-const allowedOrigins = process.env.CLIENT_ORIGIN ? [process.env.CLIENT_ORIGIN] : ['http://localhost:8081'];
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:8443')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error('Origin is not allowed'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST'],
 }));
 
 // 3. Rate Limiting (Prevents Brute-Force & Denial of Service)
@@ -62,6 +73,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 app.get('/api/pqc/status', (req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store');
   const { cipherText, sharedSecret } = ml_kem768.encapsulate(kemKeys.publicKey);
   const recoveredSecret = ml_kem768.decapsulate(cipherText, kemKeys.secretKey);
   const kemVerified = Buffer.from(sharedSecret).equals(Buffer.from(recoveredSecret));
@@ -75,6 +87,7 @@ app.get('/api/pqc/status', (req: Request, res: Response) => {
 });
 
 app.get('/api/telemetry', (req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store');
   const telemetry = createTelemetry();
   const message = encoder.encode(JSON.stringify(telemetry));
   const signature = ml_dsa65.sign(message, signingKeys.secretKey);
