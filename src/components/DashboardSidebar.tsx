@@ -87,11 +87,13 @@ export function DashboardSidebar({
   activeNav,
   onNavChange,
 }: DashboardSidebarProps) {
+  const quizUnlocked = awoken.size >= 1
+
   const nav: NavEntry[] = [
     { id: 'map',      label: 'Journey Map' },
     { id: 'passport', label: 'Passport Stamps', badge: completed.size > 0 ? String(completed.size) : undefined },
     { id: 'gems',     label: 'Hidden Gems',     badge: awoken.size > 0 ? String(awoken.size) : undefined },
-    { id: 'quiz',     label: 'Quiz' },
+    { id: 'quiz',     label: 'Quiz',            badge: quizUnlocked ? undefined : 'locked' },
     { id: 'rhino',    label: 'Talk to Rhino' },
     { id: 'settings', label: 'Settings' },
   ]
@@ -146,6 +148,7 @@ export function DashboardSidebar({
               key={item.id}
               onClick={() => onNavChange(item.id)}
               aria-current={isActive ? 'page' : undefined}
+              title={item.id === 'quiz' && !quizUnlocked ? 'Visit 3 stations to unlock' : undefined}
               style={{
                 width: '100%',
                 display: 'flex', alignItems: 'center', gap: 11,
@@ -153,9 +156,11 @@ export function DashboardSidebar({
                 background: isActive ? `rgba(145,112,67,0.13)` : 'transparent',
                 border: 'none',
                 borderLeft: `2px solid ${isActive ? R : 'transparent'}`,
-                cursor: 'pointer', textAlign: 'left',
+                cursor: 'pointer',
+                textAlign: 'left',
                 transition: 'background 0.15s',
                 boxShadow: isActive ? `inset 0 0 20px rgba(145,112,67,0.05)` : 'none',
+                opacity: item.id === 'quiz' && !quizUnlocked ? 0.5 : 1,
               }}
               onMouseEnter={e => {
                 if (!isActive) e.currentTarget.style.background = 'rgba(62,35,24,0.04)'
@@ -173,7 +178,12 @@ export function DashboardSidebar({
               }}>
                 {item.label}
               </span>
-              {item.badge && (
+              {item.badge === 'locked' ? (
+                <svg width="11" height="13" viewBox="0 0 11 13" fill="none" aria-label="Locked" role="img">
+                  <rect x="1" y="5.5" width="9" height="7" rx="1.5" stroke={D} strokeWidth="1.1" />
+                  <path d="M3 5.5V4a2.5 2.5 0 0 1 5 0v1.5" stroke={D} strokeWidth="1.1" strokeLinecap="round" />
+                </svg>
+              ) : item.badge ? (
                 <span style={{
                   fontFamily: MONO, fontWeight: 500, fontSize: 10,
                   color: isActive ? T : D,
@@ -182,7 +192,7 @@ export function DashboardSidebar({
                 }}>
                   {item.badge}
                 </span>
-              )}
+              ) : null}
             </button>
           )
         })}

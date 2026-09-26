@@ -6,6 +6,7 @@ import { RouteProgress } from '@/components/RouteProgress'
 import { DashboardSidebar } from '@/components/DashboardSidebar'
 import { StationContent } from '@/components/StationContent'
 import { HiddenGemsPanel } from '@/components/HiddenGemsPanel'
+import { QuizPanel } from '@/components/QuizPanel'
 import { VideoModal } from '@/components/VideoModal'
 import { StationWeather } from '@/components/StationWeather'
 import { ChapterUnlockedBanner } from '@/components/ui/ChapterUnlockedBanner'
@@ -284,6 +285,10 @@ export function JourneyView({
           ) : activeNav === 'gems' ? (
             <div style={{ minHeight: '100%' }}>
               <HiddenGemsPanel stIdx={stIdx} lang={lang} awoken={awoken} />
+            </div>
+          ) : activeNav === 'quiz' ? (
+            <div style={{ minHeight: '100%', animation: 'chapterSlideIn 0.5s ease-out both' }}>
+              <QuizPanel awoken={awoken} lang={lang} />
             </div>
           ) : (
             currentStation && (
