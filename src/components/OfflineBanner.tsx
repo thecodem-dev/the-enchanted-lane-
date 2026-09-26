@@ -9,7 +9,7 @@ import { S, T, D, R, G as SUPPORT, MONO, TEXT_F } from '@/styles/tokens'
  * All app content (stations, attractions, journey data) is baked into
  * the JS bundle, so the core experience works fully offline.
  * The only features that require a connection are:
- *   · Google Maps tiles (the map shows a grey placeholder when offline)
+ *   · Map tiles (previously visited areas remain available offline)
  *   · YouTube video embeds (videos won't play offline)
  */
 export function OfflineBanner() {
@@ -71,7 +71,7 @@ export function OfflineBanner() {
           Offline mode
         </div>
         <div style={{ fontFamily: TEXT_F, fontSize: 13, color: `rgba(62,35,24,0.7)` }}>
-          Journey content available offline. Map tiles and videos need a connection.
+          Journey content and saved weather remain available offline. Previously viewed map areas remain cached; new areas and videos need a connection.
         </div>
       </div>
 

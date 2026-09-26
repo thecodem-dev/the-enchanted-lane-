@@ -23,6 +23,7 @@ interface TelemetryEnvelope {
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:5000";
+const PQC_CACHE_KEY = "enchanted-line:pqc-telemetry";
 
 function fromBase64(value: string) {
   return Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
@@ -35,8 +36,16 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export function usePqcTelemetry() {
-  const [status, setStatus] = useState<PqcStatus | null>(null);
-  const [telemetry, setTelemetry] = useState<TelemetryEnvelope["telemetry"] | null>(null);
+  const [cached] = useState(() => {
+    try {
+      const raw = localStorage.getItem(PQC_CACHE_KEY);
+      return raw ? JSON.parse(raw) as { status: PqcStatus; envelope: TelemetryEnvelope } : null;
+    } catch {
+      return null;
+    }
+  });
+  const [status, setStatus] = useState<PqcStatus | null>(cached?.status ?? null);
+  const [telemetry, setTelemetry] = useState<TelemetryEnvelope["telemetry"] | null>(cached?.envelope.telemetry ?? null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -60,9 +69,14 @@ export function usePqcTelemetry() {
         }
         setStatus(security);
         setTelemetry(envelope.telemetry);
+        try {
+          localStorage.setItem(PQC_CACHE_KEY, JSON.stringify({ status: security, envelope }));
+        } catch {
+          // Verified telemetry remains available for this tab when storage is blocked.
+        }
         setError(null);
       } catch (requestError) {
-        if (active) setError(requestError instanceof Error ? requestError.message : "PQC unavailable");
+        if (active && !cached) setError(requestError instanceof Error ? requestError.message : "PQC unavailable");
       } finally {
         if (active) setIsLoading(false);
       }

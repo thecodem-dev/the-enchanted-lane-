@@ -15,6 +15,7 @@ export interface StationWeather {
 }
 
 const WEATHER_URL = 'https://api.open-meteo.com/v1/forecast'
+const WEATHER_CACHE_KEY = 'enchanted-line:station-weather'
 
 function weatherRequestUrl() {
   const params = new URLSearchParams({
@@ -58,7 +59,14 @@ interface WeatherLocation {
 }
 
 export function useStationWeather() {
-  const [weather, setWeather] = useState<Record<string, StationWeather>>({})
+  const [weather, setWeather] = useState<Record<string, StationWeather>>(() => {
+    try {
+      const cached = window.localStorage.getItem(WEATHER_CACHE_KEY)
+      return cached ? JSON.parse(cached) as Record<string, StationWeather> : {}
+    } catch {
+      return {}
+    }
+  })
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -92,6 +100,11 @@ export function useStationWeather() {
         })
 
         setWeather(nextWeather)
+        try {
+          window.localStorage.setItem(WEATHER_CACHE_KEY, JSON.stringify(nextWeather))
+        } catch {
+          // Weather remains available in memory when storage is unavailable.
+        }
         setError(null)
       } catch (requestError) {
         if (requestError instanceof DOMException && requestError.name === 'AbortError') return

@@ -5,14 +5,15 @@
  *  · App shell (JS/CSS/HTML): Cache-first, populated on install
  *  · Google Fonts CSS:        Stale-while-revalidate, 7-day cache
  *  · Google Fonts woff2:      Cache-first, 1-year cache (immutable)
- *  · Google Maps tiles/API:   Network-first, 10-min cache (tiles change)
+ *  · MapLibre/OpenFreeMap:     Network-first, 30-day cache (tiles change)
+ *  · Open-Meteo weather/API:   Network-first, 15-min cache
  *  · YouTube embeds:          Network-only (video must be live)
  *  · Everything else:         Network-first with offline fallback
  *
  * Cache names are versioned so old caches are pruned on activate.
  */
 
-const VERSION      = 'v2'
+const VERSION      = 'v3'
 const SHELL_CACHE  = `enchanted-shell-${VERSION}`
 const FONTS_CACHE  = `enchanted-fonts-${VERSION}`
 const MAPS_CACHE   = `enchanted-maps-${VERSION}`
@@ -81,13 +82,20 @@ self.addEventListener('fetch', event => {
     return
   }
 
-  // ── Google Maps — network-first, short tile cache ─────────
+  // ── MapLibre/OpenFreeMap — network-first, long tile cache ─
   if (
-    url.hostname.includes('maps.googleapis.com') ||
-    url.hostname.includes('maps.gstatic.com') ||
-    url.hostname.includes('mapsplatform.google.com')
+    url.hostname === 'tiles.openfreemap.org' ||
+    url.hostname === 'a.tile.openfreemap.org' ||
+    url.hostname === 'b.tile.openfreemap.org' ||
+    url.hostname === 'c.tile.openfreemap.org'
   ) {
-    event.respondWith(networkFirst(MAPS_CACHE, request, 10 * 60))
+    event.respondWith(networkFirst(MAPS_CACHE, request, 30 * 24 * 60 * 60))
+    return
+  }
+
+  // ── Open-Meteo — network-first, cached offline fallback ────
+  if (url.hostname === 'api.open-meteo.com') {
+    event.respondWith(networkFirst(RUNTIME_CACHE, request, 15 * 60))
     return
   }
 
