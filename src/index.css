@@ -1,47 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Libre+Franklin:wght@300;400;500;600&family=DM+Mono:ital,wght@0,400;0,500;1,400&display=swap');
+/* Poppins — body, UI and labels. DM Mono is kept only for the Google Map markers,
+ * which are intentionally unchanged for now. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=DM+Mono:wght@400;500;700&display=swap');
 @import 'tailwindcss';
 
-@theme {
-  --font-display: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
-  --font-text: 'Crimson Pro', Georgia, serif;
-  --font-sans: 'Libre Franklin', system-ui, sans-serif;
-  --font-mono: 'DM Mono', 'Courier New', monospace;
+/* Del Rose — display face, self-hosted */
+@font-face {
+  font-family: 'Del Rose';
+  src: url('/fonts/DelRose-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
-  /* ── Blue Train palette ───────────────────────────────────────
-   *
-   * Derived from the actual Blue Train livery and interior:
-   *   · Royal cobalt blue steel carriages (since 1937)
-   *   · Gold-dusted windows (real gold film to reduce heat/glare)
-   *   · Ivory linen tablecloths and stationery
-   *   · Polished brass stanchions at departure
-   *   · Malachite green upholstery in the lounge cars
+@theme {
+  --font-display: 'Del Rose', Georgia, serif;
+  --font-text: 'Poppins', system-ui, sans-serif;
+  --font-sans: 'Poppins', system-ui, sans-serif;
+  --font-mono: 'Poppins', system-ui, sans-serif;
+
+  /* ── Antique Brass palette — shared by the landing page and the app ──
+   * Light: espresso text on cream / tan surfaces. The landing page uses these
+   * as Tailwind classes (bg-cream, text-rust…); app components use the mirrored
+   * values in src/styles/tokens.ts.
    * ─────────────────────────────────────────────────────────── */
 
-  --color-void:         #0A0F1A; /* Night sky through gold-tinted glass   */
-  --color-surface:      #0F1E3A; /* Cobalt carriage body / bulkhead panels */
-  --color-panel:        #162444; /* Dining car wood paneling               */
-  --color-text:         #F0E8D0; /* Ivory linen — tablecloths, notepaper  */
-  --color-gold:         #C9A84C; /* Polished brass + exterior chevrons     */
-  --color-gold-bright:  #E8C96A; /* Highlighted gold trim                  */
-  --color-gold-dim:     #7A6230; /* Aged brass — subdued labels            */
-  --color-support:      #4A7C6A; /* Malachite green — lounge upholstery    */
-  --color-dim:          #2A4A6A; /* Steel blue — window frames, muted text */
+  --color-cream:    #FAF4E0; /* Page background                      */
+  --color-tan:      #D7CBB5; /* Secondary surface, cards              */
+  --color-sage:     #A6A99A; /* Muted accent, dividers — not for text */
+  --color-brass:    #917043; /* Primary accent                        */
+  --color-rust:     #88523D; /* CTAs, emphasis                        */
+  --color-espresso: #3E2318; /* Primary text                          */
+  --color-muted:    #6B5444; /* Secondary text                        */
 
-  /* ── Legacy aliases (kept for Tailwind class compatibility) ── */
-  --color-accent:          #C9A84C;
-  --color-rail-void:       #0A0F1A;
-  --color-rail-deep:       #0A0F1A;
-  --color-rail-land:       #0F1E3A;
-  --color-rail-surface:    #0F1E3A;
-  --color-rail-gold:       #C9A84C;
-  --color-rail-gold-bright:#E8C96A;
-  --color-rail-gold-dim:   #7A6230;
-  --color-rail-cream:      #F0E8D0;
-  --color-rail-muted:      #2A4A6A;
-  --color-rail-rust:       #7a2e1a;
-  --color-rail-sage:       #4A7C6A;
-  --color-reveal:          #1A1005; /* Dark warmth for hover states       */
-  --color-ink:             #0A0F1A; /* Text on gold buttons               */
+  --radius-btn: 6px;
 }
 
 @keyframes ticketDrop {
@@ -99,6 +90,8 @@
 
 /* Fill the full dynamic viewport height on mobile browsers */
 html, body, #root {
+  background: #FAF4E0;
+  color: #3E2318;
   height: 100%;
   height: 100dvh;
 }
@@ -123,4 +116,123 @@ body {
 @keyframes gemDrop {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Landing page ──────────────────────────────────────────────
+ * Imported from the former standalone enchanted-lane-landing project.
+ * Body-level type is scoped to .landing so it can't shift the app's layout.
+ * ─────────────────────────────────────────────────────────── */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+  }
+
+  .landing {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-cream);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Type scale from the landing brief. */
+  .text-hero {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 6vw, 56px);
+    line-height: 1.15;
+    font-weight: 400;
+  }
+  .text-h2 {
+    font-size: 28px;
+    line-height: 1.3;
+    font-weight: 600;
+  }
+  .text-h3 {
+    font-size: 18px;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+  .text-label {
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 500;
+  }
+  .text-eyebrow {
+    font-size: 11px;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Ticket perforation: a real mask, so the bites stay transparent over any background. */
+  .ticket-perforated {
+    --perf-r: 5px;
+    --perf-gap: 14px;
+    -webkit-mask:
+      radial-gradient(circle var(--perf-r) at 0 50%, #0000 calc(var(--perf-r) - 0.5px), #000 var(--perf-r))
+        0 0 / 51% var(--perf-gap) repeat-y,
+      radial-gradient(circle var(--perf-r) at 100% 50%, #0000 calc(var(--perf-r) - 0.5px), #000 var(--perf-r))
+        100% 0 / 51% var(--perf-gap) repeat-y;
+    mask:
+      radial-gradient(circle var(--perf-r) at 0 50%, #0000 calc(var(--perf-r) - 0.5px), #000 var(--perf-r))
+        0 0 / 51% var(--perf-gap) repeat-y,
+      radial-gradient(circle var(--perf-r) at 100% 50%, #0000 calc(var(--perf-r) - 0.5px), #000 var(--perf-r))
+        100% 0 / 51% var(--perf-gap) repeat-y;
+  }
+
+  /* Faint engraved guilloché lines, as on tickets. */
+  .guilloche {
+    background-image: repeating-linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--color-brass) 9%, transparent) 0 1px,
+      transparent 1px 9px
+    );
+  }
+
+  /* Paper grain for large light surfaces, so cream never reads as flat. */
+  .paper {
+    background-image:
+      radial-gradient(color-mix(in srgb, var(--color-espresso) 5%, transparent) 0.6px, transparent 0.8px),
+      radial-gradient(color-mix(in srgb, var(--color-brass) 5%, transparent) 0.6px, transparent 0.8px);
+    background-size:
+      7px 7px,
+      11px 11px;
+    background-position:
+      0 0,
+      3px 5px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }

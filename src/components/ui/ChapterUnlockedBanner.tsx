@@ -15,13 +15,13 @@ export function ChapterUnlockedBanner() {
         padding: '7px 18px',
         display: 'inline-flex', alignItems: 'center', gap: 10,
         pointerEvents: 'none', whiteSpace: 'nowrap',
-        boxShadow: `0 4px 20px rgba(201,168,76,0.2)`,
+        boxShadow: `0 4px 16px rgba(62,35,24,0.14)`,
       }}
     >
       <svg width="8" height="8" viewBox="0 0 10 10" aria-hidden="true">
         <rect x="0" y="0" width="10" height="10" fill={A} transform="rotate(45 5 5)" />
       </svg>
-      <span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.15em', color: T, textTransform: 'uppercase' }}>
+      <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 11, letterSpacing: '0.15em', color: T, textTransform: 'uppercase' }}>
         Chapter Unlocked
       </span>
     </div>

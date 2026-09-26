@@ -9,7 +9,7 @@ import { HiddenGemsPanel } from '@/components/HiddenGemsPanel'
 import { VideoModal } from '@/components/VideoModal'
 import { ChapterUnlockedBanner } from '@/components/ui/ChapterUnlockedBanner'
 import { useIsMobile } from '@/hooks/useIsMobile'
-import { V, T, A, D, MONO, SANS, DISPLAY } from '@/styles/tokens'
+import { V, S, T, A, D, R, MONO, SANS, DISPLAY } from '@/styles/tokens'
 import type { Language, Station } from '@/types'
 import type { NavItem } from '@/components/DashboardSidebar'
 
@@ -67,25 +67,25 @@ export function JourneyView({
         {/* Mobile top bar */}
         <div style={{
           height: 48,
-          borderBottom: `1px solid rgba(201,168,76,0.18)`,
+          borderBottom: `1px solid rgba(145,112,67,0.23)`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           paddingLeft: 16, paddingRight: 16, flexShrink: 0,
-          background: `rgba(5,14,24,0.96)`, backdropFilter: 'blur(8px)',
+          background: `rgba(215,203,181,0.96)`, backdropFilter: 'blur(8px)',
         }}>
           <span style={{
-            fontFamily: DISPLAY, fontSize: 13,
-            fontWeight: 700, color: T, letterSpacing: '0.06em', textTransform: 'uppercase',
+            fontFamily: DISPLAY, fontSize: 20,
+            fontWeight: 400, color: T, lineHeight: 1,
           }}>
             Enchanted Line
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontFamily: MONO, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
+            <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
               {STATIONS[stIdx]?.num ?? 'I'} / IX
             </span>
             <div
               role="progressbar"
               aria-label={`Journey progress: ${Math.round(progressPct)}%`}
-              style={{ width: 56, height: 3, background: `rgba(201,168,76,0.15)`, borderRadius: 2 }}
+              style={{ width: 56, height: 3, background: `rgba(145,112,67,0.2)`, borderRadius: 2 }}
             >
               <div style={{
                 width: `${progressPct}%`,
@@ -139,11 +139,11 @@ export function JourneyView({
       {/* Top bar */}
       <div style={{
         height: 56, flexShrink: 0, zIndex: 10,
-        borderBottom: `1px solid rgba(201,168,76,0.2)`,
+        borderBottom: `1px solid rgba(145,112,67,0.26)`,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         paddingLeft: 24, paddingRight: 24,
-        background: `linear-gradient(180deg, #162444 0%, #0F1E3A 100%)`,
-        boxShadow: `0 1px 0 rgba(201,168,76,0.08), 0 4px 20px rgba(0,0,0,0.4)`,
+        background: S,
+        boxShadow: `0 1px 0 rgba(145,112,67,0.1), 0 4px 20px rgba(62,35,24,0.14)`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -155,14 +155,14 @@ export function JourneyView({
             <rect x="7" y="5" width="2" height="3" fill={A} opacity="0.4" />
             <rect x="10" y="5" width="2" height="3" fill={A} opacity="0.4" />
           </svg>
-          <span style={{ fontFamily: DISPLAY, fontSize: 15, fontWeight: 700, color: T, letterSpacing: '0.03em' }}>
+          <span style={{ fontFamily: DISPLAY, fontSize: 22, fontWeight: 400, color: T, lineHeight: 1 }}>
             The Enchanted Line
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {activeNav === 'map' && currentStation && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontFamily: MONO, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
+              <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, color: D, letterSpacing: '0.1em' }}>
                 {currentStation.names[lang]}
               </span>
               {!isComplete && (
@@ -170,30 +170,30 @@ export function JourneyView({
                   onClick={onContinue}
                   disabled={isMoving}
                   style={{
-                    background: isMoving ? 'transparent' : A,
-                    border: `1px solid ${isMoving ? `rgba(201,168,76,0.2)` : A}`,
+                    background: isMoving ? 'transparent' : R,
+                    border: `1px solid ${isMoving ? `rgba(145,112,67,0.26)` : R}`,
                     borderRadius: 4, padding: '5px 14px',
                     cursor: isMoving ? 'default' : 'pointer',
-                    fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em',
+                    fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.14em',
                     textTransform: 'uppercase',
                     color: isMoving ? D : V,
                     transition: 'all 0.15s',
                   }}
-                  onMouseEnter={e => { if (!isMoving) e.currentTarget.style.background = '#DDB84E' }}
-                  onMouseLeave={e => { if (!isMoving) e.currentTarget.style.background = A }}
+                  onMouseEnter={e => { if (!isMoving) e.currentTarget.style.background = T }}
+                  onMouseLeave={e => { if (!isMoving) e.currentTarget.style.background = R }}
                 >
                   {isMoving ? 'En Route…' : 'Depart →'}
                 </button>
               )}
             </div>
           )}
-          <span style={{ fontFamily: MONO, fontSize: 11, color: D, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 11, color: D, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             Ch. {STATIONS[stIdx]?.num ?? 'I'} / IX
           </span>
           <div
             role="progressbar"
             aria-label={`Journey progress: ${Math.round(progressPct)}%`}
-            style={{ width: 72, height: 2, background: 'rgba(255,255,255,0.06)', borderRadius: 1 }}
+            style={{ width: 72, height: 2, background: 'rgba(62,35,24,0.09)', borderRadius: 1 }}
           >
             <div style={{
               width: `${progressPct}%`,
@@ -234,15 +234,15 @@ export function JourneyView({
                 <div style={{
                   position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
                   zIndex: 5, pointerEvents: 'none',
-                  background: 'rgba(5,14,24,0.75)', backdropFilter: 'blur(6px)',
-                  border: `1px solid rgba(201,168,76,0.2)`,
+                  background: 'rgba(250,244,224,0.9)', backdropFilter: 'blur(6px)',
+                  border: `1px solid rgba(145,112,67,0.26)`,
                   borderRadius: 20, padding: '5px 14px',
                   display: 'flex', alignItems: 'center', gap: 7,
                 }}>
                   <svg width="8" height="9" viewBox="0 0 8 9">
                     <polygon points="0,0 8,4.5 0,9" fill={A} opacity="0.8" />
                   </svg>
-                  <span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.14em', color: `rgba(230,217,184,0.65)`, textTransform: 'uppercase' }}>
+                  <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.14em', color: `rgba(62,35,24,0.65)`, textTransform: 'uppercase' }}>
                     Click any station to watch
                   </span>
                 </div>
@@ -261,7 +261,7 @@ export function JourneyView({
                   <div style={{
                     position: 'absolute', top: 0, right: 0, bottom: 0,
                     width: 360, zIndex: 20,
-                    boxShadow: '-8px 0 32px rgba(0,0,0,0.4)',
+                    boxShadow: '-8px 0 32px rgba(62,35,24,0.14)',
                   }}>
                     <ChapterPanel
                       station={activeStation} lang={lang} completed={completed}

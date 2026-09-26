@@ -16,8 +16,8 @@ export function ArtDecoOrnament() {
           transform={`rotate(45 ${x} 14)`}
         />
       ))}
-      <line x1="20" y1="4" x2="100" y2="4" stroke={`rgba(201,168,76,0.25)`} strokeWidth="0.5" />
-      <line x1="20" y1="24" x2="100" y2="24" stroke={`rgba(201,168,76,0.25)`} strokeWidth="0.5" />
+      <line x1="20" y1="4" x2="100" y2="4" stroke={`rgba(145,112,67,0.33)`} strokeWidth="0.5" />
+      <line x1="20" y1="24" x2="100" y2="24" stroke={`rgba(145,112,67,0.33)`} strokeWidth="0.5" />
     </svg>
   )
 }

@@ -12,7 +12,7 @@
  * Cache names are versioned so old caches are pruned on activate.
  */
 
-const VERSION      = 'v1'
+const VERSION      = 'v2'
 const SHELL_CACHE  = `enchanted-shell-${VERSION}`
 const FONTS_CACHE  = `enchanted-fonts-${VERSION}`
 const MAPS_CACHE   = `enchanted-maps-${VERSION}`
@@ -58,6 +58,11 @@ self.addEventListener('fetch', event => {
   // Skip non-GET and browser-extension requests
   if (request.method !== 'GET') return
   if (!url.protocol.startsWith('http')) return
+
+  // ── Media and range requests — let the browser stream them ──
+  // Video is fetched in byte ranges (206 responses), which the Cache API
+  // can't store; the landing hero video would fail to play otherwise.
+  if (request.headers.has('range') || request.destination === 'video' || request.destination === 'audio') return
 
   // ── YouTube — network only (video content must be live) ──
   if (url.hostname.includes('youtube.com') || url.hostname.includes('ytimg.com')) {

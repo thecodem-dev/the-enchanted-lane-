@@ -1,7 +1,4 @@
-import { T as IVORY, A as SEAL_RIM } from '@/styles/tokens'
-
-const SEAL_BG   = '#0A1E42'   // deep cobalt seal
-const SEAL_BUMP = '#0D2254'   // slightly lighter relief bumps
+import { V as NUMERAL, A as SEAL_RIM, R as SEAL_BG, T as SEAL_BUMP, SANS } from '@/styles/tokens'
 
 interface WaxSealProps {
   num: string
@@ -28,7 +25,7 @@ export function WaxSeal({ num, size = 28 }: WaxSealProps) {
             key={i}
             cx={14 + Math.cos(angle) * 12.2}
             cy={14 + Math.sin(angle) * 12.2}
-            r="1.2" fill={SEAL_BUMP}
+            r="1.2" fill={SEAL_BUMP} opacity="0.3"
           />
         )
       })}
@@ -36,9 +33,9 @@ export function WaxSeal({ num, size = 28 }: WaxSealProps) {
       <text
         x="14" y="18"
         textAnchor="middle"
-        fill={IVORY}
+        fill={NUMERAL}
         fontSize={num.length > 3 ? 7 : 9}
-        fontFamily="'Cormorant Garamond', 'Playfair Display', serif"
+        fontFamily={SANS}
         fontStyle="italic"
         fontWeight="600"
       >

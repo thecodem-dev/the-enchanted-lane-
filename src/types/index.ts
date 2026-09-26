@@ -1,8 +1,8 @@
 /** Supported UI languages */
 export type Language = 'en' | 'zu' | 'af' | 'st'
 
-/** App phase — intro splash or the main journey */
-export type Phase = 'intro' | 'journey'
+/** App phase — landing page, sign-in, intro splash, or the main journey */
+export type Phase = 'landing' | 'sign-in' | 'intro' | 'journey'
 
 /** A single stop on the route, with localised names and content */
 export interface Station {
