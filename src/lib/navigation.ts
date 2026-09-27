@@ -5,6 +5,8 @@
  *   /sign-in   passenger sign-in
  *   /board     boarding: intro screen, then the journey (signed-in only)
  *
+ * Registration is disabled for now (see src/lib/auth.ts) — sign-in is local-only.
+ *
  * Journey progress isn't persisted, so /journey would have nothing to restore;
  * both the intro and the journey live under /board.
  */
@@ -15,10 +17,9 @@ const BASE = import.meta.env.BASE_URL // always ends with '/'
 
 export const LANDING_PATH = BASE
 export const SIGN_IN_PATH = `${BASE}sign-in`
-export const SIGN_UP_PATH = `${BASE}sign-up`
 export const BOARD_PATH   = `${BASE}board`
 
-export type Route = 'landing' | 'sign-in' | 'sign-up' | 'board'
+export type Route = 'landing' | 'sign-in' | 'board'
 
 function matches(pathname: string, path: string) {
   return pathname === path || pathname.startsWith(`${path}/`)
@@ -26,7 +27,6 @@ function matches(pathname: string, path: string) {
 
 export function routeFromPath(pathname: string): Route {
   if (matches(pathname, BOARD_PATH)) return 'board'
-  if (matches(pathname, SIGN_UP_PATH)) return 'sign-up'
   if (matches(pathname, SIGN_IN_PATH)) return 'sign-in'
   return 'landing'
 }
@@ -63,5 +63,4 @@ function linkTo(path: string) {
 /** "Board the train" links — signed-out passengers are sent to sign in first. */
 export const goToBoard   = linkTo(BOARD_PATH)
 export const goToSignIn  = linkTo(SIGN_IN_PATH)
-export const goToSignUp  = linkTo(SIGN_UP_PATH)
 export const goToLanding = linkTo(LANDING_PATH)

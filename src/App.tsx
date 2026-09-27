@@ -12,7 +12,6 @@
 import { useEffect, useState } from 'react'
 import { LandingPage } from '@/components/landing/LandingPage'
 import { SignInPage } from '@/components/SignInPage'
-import { SignUpPage } from '@/components/SignUpPage'
 import { IntroScreen } from '@/components/IntroScreen'
 import { JourneyView } from '@/components/JourneyView'
 import { OfflineBanner } from '@/components/OfflineBanner'
@@ -37,7 +36,6 @@ function phaseForUrl(prev: Phase): Phase {
   if (route === 'landing') return 'landing'
   if (route === 'board' && !signedIn) { redirect(SIGN_IN_PATH); return 'sign-in' }
   if (route === 'sign-in' && !signedIn) return 'sign-in'
-  if (route === 'sign-up' && !signedIn) return 'sign-up'
   redirect(BOARD_PATH)
   // Passengers who've boarded before go straight back to their journey
   return prev === 'journey' || hasBoarded() ? 'journey' : 'intro'
@@ -91,8 +89,6 @@ export default function App() {
         <LandingPage />
       ) : phase === 'sign-in' ? (
         <SignInPage />
-      ) : phase === 'sign-up' ? (
-        <SignUpPage />
       ) : phase === 'intro' ? (
         <IntroScreen
           lang={lang}
