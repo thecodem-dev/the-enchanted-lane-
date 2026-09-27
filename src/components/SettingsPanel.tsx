@@ -281,7 +281,7 @@ export function SettingsPanel({ lang, setLang, stIdx, completed, onResetJourney,
           />
           <SettingRow
             label="Saved on this device"
-            hint="Your settings and sign-in. Resetting restores the defaults above; your journey and sign-in stay."
+            hint="Your settings, journey progress, saved trip and sign-in. Resetting restores the settings above; your journey, trip and sign-in stay."
             control={confirmingDefaults ? (
               <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <button style={solidButton} onClick={() => { resetPreferences(); setConfirmingDefaults(false) }}>Yes, reset</button>

@@ -24,7 +24,7 @@ export function Footer() {
         <ul className="text-label flex gap-8 text-espresso/80">
           {LINKS.map((l) => (
             <li key={l.label}>
-              <a href={l.href} onClick={"onClick" in l ? l.onClick : undefined} className="underline-offset-[6px] decoration-brass hover:text-espresso hover:underline">
+              <a href={l.href} onClick={"onClick" in l ? l.onClick : undefined} className="inline-block py-2 underline-offset-[6px] decoration-brass hover:text-espresso hover:underline">
                 {l.label}
               </a>
             </li>

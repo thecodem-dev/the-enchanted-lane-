@@ -107,7 +107,7 @@ function createStationMarker(
 
 function createTrainMarker() {
   const element = document.createElement('div')
-  element.setAttribute('aria-label', 'The Enchanted Line')
+  element.setAttribute('aria-label', 'The Enchanted Lane train')
   element.innerHTML = `<svg width="14" height="10" viewBox="0 0 14 10" fill="none"><rect x="0" y="2" width="12" height="5" rx="1.5" fill="${V}"/><rect x="2" y="0" width="7" height="4" rx="1" fill="${V}" opacity=".75"/><circle cx="2.5" cy="8" r="1.5" fill="${V}"/><circle cx="8.5" cy="8" r="1.5" fill="${V}"/></svg>`
   element.style.cssText = `width:28px;height:28px;background:${T};border:2px solid ${V};border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px rgba(136,82,61,.35),0 2px 8px rgba(62,35,24,.35)`
   return element

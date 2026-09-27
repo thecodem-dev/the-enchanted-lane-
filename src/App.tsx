@@ -19,6 +19,8 @@ import { useTrainAnimation } from '@/hooks/useTrainAnimation'
 import { getSession, signOut } from '@/lib/auth'
 import { setPreference, usePreferences } from '@/lib/preferences'
 import { clearThemaChat } from '@/lib/themaChat'
+import { hasBoarded, saveJourney } from '@/lib/journeyStore'
+import { clearTrip } from '@/lib/tripStore'
 import { BOARD_PATH, LANDING_PATH, SIGN_IN_PATH, navigate, redirect, routeFromPath } from '@/lib/navigation'
 import type { Language, Phase } from '@/types'
 
@@ -35,7 +37,8 @@ function phaseForUrl(prev: Phase): Phase {
   if (route === 'board' && !signedIn) { redirect(SIGN_IN_PATH); return 'sign-in' }
   if (route === 'sign-in' && !signedIn) return 'sign-in'
   redirect(BOARD_PATH)
-  return prev === 'journey' ? 'journey' : 'intro'
+  // Passengers who've boarded before go straight back to their journey
+  return prev === 'journey' || hasBoarded() ? 'journey' : 'intro'
 }
 
 export default function App() {
@@ -76,6 +79,7 @@ export default function App() {
     signOut()
     resetJourney()
     clearThemaChat()
+    clearTrip()
     navigate(LANDING_PATH)
   }
 
@@ -89,7 +93,7 @@ export default function App() {
         <IntroScreen
           lang={lang}
           setLang={setLang}
-          onBegin={() => setPhase('journey')}
+          onBegin={() => { saveJourney({ boarded: true }); setPhase('journey') }}
         />
       ) : (
         <JourneyView

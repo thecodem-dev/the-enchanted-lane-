@@ -1,6 +1,6 @@
 {
-  "name": "The Enchanted Line",
-  "short_name": "Enchanted Line",
+  "name": "The Enchanted Lane",
+  "short_name": "Enchanted Lane",
   "description": "An interactive train journey from Pretoria to Cape Town — 1,600 km of living heritage.",
   "start_url": "/board",
   "display": "standalone",

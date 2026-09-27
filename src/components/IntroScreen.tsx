@@ -105,7 +105,7 @@ export function IntroScreen({ lang, setLang, onBegin }: IntroScreenProps) {
             fontWeight: 400, color: T,
             lineHeight: 1, marginBottom: 6,
           }}>
-            The Enchanted Line
+            The Enchanted Lane
           </div>
 
           <div style={{

@@ -89,7 +89,18 @@ export function VideoModal({
 
         {/* Video embed */}
         <div style={{ position: 'relative', paddingBottom: '52%', background: S }}>
-          {vid ? (
+          {vid?.src ? (
+            <video
+              key={vid.src}
+              src={vid.src}
+              title={vid.title}
+              controls
+              playsInline
+              preload="metadata"
+              autoPlay={autoplayVideos}
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', background: T }}
+            />
+          ) : vid?.videoId ? (
             <iframe
               src={`https://www.youtube.com/embed/${vid.videoId}?autoplay=${autoplayVideos ? 1 : 0}&rel=0&modestbranding=1&color=white`}
               title={vid.title}

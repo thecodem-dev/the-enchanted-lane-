@@ -134,7 +134,7 @@ export function DashboardSidebar({
           color: T, lineHeight: 1, marginBottom: 6,
           textAlign: 'center',
         }}>
-          The Enchanted Line
+          The Enchanted Lane
         </div>
         <div style={{
           fontFamily: MONO, fontWeight: 500,
@@ -154,7 +154,7 @@ export function DashboardSidebar({
               key={item.id}
               onClick={() => onNavChange(item.id)}
               aria-current={isActive ? 'page' : undefined}
-              title={item.id === 'quiz' && !quizUnlocked ? 'Visit 3 stations to unlock' : undefined}
+              title={item.id === 'quiz' && !quizUnlocked ? 'Reach your first station to unlock' : undefined}
               style={{
                 width: '100%',
                 display: 'flex', alignItems: 'center', gap: 11,

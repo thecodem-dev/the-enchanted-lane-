@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { Building2, Castle, Clock, FlaskConical, Hourglass, Landmark, Palette, Phone, Trees, Users, type LucideIcon } from 'lucide-react'
 import { STATIONS } from '@/data/stations'
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/data/attractions'
 import { ATTRACTION_PHOTOS } from '@/data/attractionPhotos'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { formatTripDate, removeFromTrip, saveToTrip, useTrip } from '@/lib/tripStore'
 import { GemMatcher } from '@/components/GemMatcher'
 import { CORRIDOR_GEMS } from '@/data/corridorGems'
 import type { Language } from '@/types'
@@ -131,13 +132,26 @@ function PriceRangeSlider({ min, max, onChange }: { min: number; max: number; on
 // Booking modal
 // ─────────────────────────────────────────────────────────────────
 
-interface BookingForm { name: string; email: string; date: string; guests: string; notes: string }
-const EMPTY: BookingForm = { name: '', email: '', date: '', guests: '1', notes: '' }
+interface BookingForm { date: string; guests: string; notes: string }
+const EMPTY: BookingForm = { date: '', guests: '1', notes: '' }
+
+/** Escape closes an open panel */
+function useEscape(onClose: () => void) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+}
 
 function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attraction; isUpcoming: boolean; onClose: () => void }) {
   const isMobile = useIsMobile()
+  useEscape(onClose)
   const px = isMobile ? 18 : 28
-  const [form, setForm] = useState<BookingForm>(EMPTY)
+  const existing = useTrip()[attraction.id]
+  const [form, setForm] = useState<BookingForm>(
+    existing ? { date: existing.date, guests: String(existing.guests), notes: existing.notes } : EMPTY,
+  )
   const [submitted, setSubmitted] = useState(false)
 
   const field = (k: keyof BookingForm) => ({
@@ -153,7 +167,7 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
   const lbl: React.CSSProperties = { fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.15em', color: R, textTransform: 'uppercase', display: 'block', marginBottom: 5 }
 
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(62,35,24,0.45)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 350, background: 'rgba(62,35,24,0.45)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
       <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 460, height: '100%', background: VOID, borderLeft: `1px solid rgba(145,112,67,0.23)`, display: 'flex', flexDirection: 'column', animation: 'slideInRight 0.28s cubic-bezier(0.22,0.61,0.36,1) both', overflow: 'hidden' }}>
 
         {submitted ? (
@@ -164,10 +178,11 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
               <circle cx="32" cy="32" r="30" fill="none" stroke={ACCENT} strokeWidth="1.5" />
               <path d="M20 32 L28 40 L44 24" stroke={ACCENT} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <div style={{ fontFamily: DISPLAY, fontSize: 36, fontWeight: 400, color: TEXT, lineHeight: 1 }}>It's yours.</div>
-            <div style={{ fontFamily: TEXT_F, fontSize: 16, color: DIM, lineHeight: 1.7, maxWidth: 300 }}>
-              Your enquiry for <em style={{ color: TEXT }}>{attraction.name}</em> is on its way to the venue.
-              Expect a reply at <span style={{ color: TEXT }}>{form.email}</span> within 24 hours.
+            <div style={{ fontFamily: DISPLAY, fontSize: 36, fontWeight: 400, color: TEXT, lineHeight: 1 }}>Saved to your trip.</div>
+            <div style={{ fontFamily: TEXT_F, fontSize: 16, color: DIM, lineHeight: 1.7, maxWidth: 320 }}>
+              <em style={{ color: TEXT }}>{attraction.name}</em> is in your trip for{' '}
+              <span style={{ color: TEXT }}>{formatTripDate(form.date)}</span> · {form.guests} guest{form.guests !== '1' ? 's' : ''}.
+              Nothing is booked or paid yet — confirm with the venue when you’re ready.
             </div>
             {attraction.bookingInfo.url && (
               <a href={attraction.bookingInfo.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: MONO, fontWeight: 500, fontSize: 10, letterSpacing: '0.12em', color: R, textDecoration: 'none', borderBottom: `1px solid rgba(145,112,67,0.45)`, paddingBottom: 2 }}>
@@ -193,7 +208,7 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
             <div style={{ padding: `22px ${px}px 16px`, borderBottom: `1px solid rgba(62,35,24,0.09)`, flexShrink: 0, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <div>
                 <div style={{ fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.18em', color: R, textTransform: 'uppercase', marginBottom: 5 }}>
-                  {isUpcoming ? 'Advance claim' : "You're claiming"}
+                  {existing ? 'In your trip' : isUpcoming ? 'Planning ahead' : 'Add to your trip'}
                 </div>
                 <div style={{ fontFamily: DISPLAY, fontSize: 30, fontWeight: 400, color: TEXT, lineHeight: 1.05 }}>{attraction.name}</div>
                 <div style={{ fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 14, color: DIM, marginTop: 3 }}>{attraction.tagline}</div>
@@ -205,7 +220,7 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
             {isUpcoming && (
               <div style={{ margin: `14px ${px}px 0`, padding: '11px 14px', borderRadius: 8, background: `rgba(166,169,154,0.2)`, border: `1px solid rgba(166,169,154,0.55)`, display: 'flex', gap: 10, alignItems: 'flex-start', flexShrink: 0 }}>
                 <span style={{ fontFamily: TEXT_F, fontSize: 14, color: TEXT, lineHeight: 1.55 }}>
-                  The train hasn't reached this stop yet. Book ahead and the venue will hold your spot.
+                  The train hasn’t reached this stop yet — save it now and it’ll be waiting in your trip.
                 </span>
               </div>
             )}
@@ -225,11 +240,11 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
             </div>
 
             {/* ── Form ── */}
-            <form onSubmit={e => { e.preventDefault(); setSubmitted(true) }} style={{ flex: 1, overflowY: 'auto', padding: `18px ${px}px 0`, display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
-                <div><label style={lbl}>Full name</label><input required style={inp} placeholder="Your name" {...field('name')} onFocus={e => { e.currentTarget.style.borderColor = `rgba(145,112,67,0.59)` }} onBlur={e => { e.currentTarget.style.borderColor = 'rgba(62,35,24,0.14)' }} /></div>
-                <div><label style={lbl}>Email</label><input required type="email" style={inp} placeholder="you@email.com" {...field('email')} onFocus={e => { e.currentTarget.style.borderColor = `rgba(145,112,67,0.59)` }} onBlur={e => { e.currentTarget.style.borderColor = 'rgba(62,35,24,0.14)' }} /></div>
-              </div>
+            <form onSubmit={e => {
+              e.preventDefault()
+              saveToTrip(attraction.id, { date: form.date, guests: parseInt(form.guests) || 1, notes: form.notes.trim() })
+              setSubmitted(true)
+            }} style={{ flex: 1, overflowY: 'auto', padding: `18px ${px}px 0`, display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 12 }}>
                 <div><label style={lbl}>Visit date</label><input required type="date" style={inp} {...field('date')} onFocus={e => { e.currentTarget.style.borderColor = `rgba(145,112,67,0.59)` }} onBlur={e => { e.currentTarget.style.borderColor = 'rgba(62,35,24,0.14)' }} /></div>
                 <div><label style={lbl}>Guests</label>
@@ -265,10 +280,19 @@ function BookingModal({ attraction, isUpcoming, onClose }: { attraction: Attract
                   onMouseEnter={e => { e.currentTarget.style.background = TEXT }}
                   onMouseLeave={e => { e.currentTarget.style.background = R }}
                 >
-                  {isUpcoming ? 'Lock in advance' : 'Lock it in'}
+                  {existing ? 'Update my trip' : 'Save to my trip'}
                 </button>
+                {existing && (
+                  <button
+                    type="button"
+                    onClick={() => { removeFromTrip(attraction.id); onClose() }}
+                    style={{ width: '100%', marginTop: 8, padding: '12px', borderRadius: 6, background: 'transparent', border: '1px solid rgba(62,35,24,0.25)', cursor: 'pointer', fontFamily: MONO, fontWeight: 500, fontSize: 11, letterSpacing: '0.16em', textTransform: 'uppercase', color: DIM }}
+                  >
+                    Remove from trip
+                  </button>
+                )}
                 <div style={{ textAlign: 'center', marginTop: 9, fontFamily: TEXT_F, fontStyle: 'italic', fontSize: 13, color: DIM }}>
-                  No payment taken now · Free to cancel
+                  Nothing is booked or paid yet
                 </div>
               </div>
             </form>
@@ -289,12 +313,12 @@ const CATEGORY_ICONS: Record<AttractionCategory, LucideIcon> = {
 }
 
 function GemEntry({
-  attraction, index, isUpcoming, onClaim,
+  attraction, index, isUpcoming, onAddToTrip,
 }: {
   attraction: Attraction
   index: number
   isUpcoming: boolean
-  onClaim: (a: Attraction) => void
+  onAddToTrip: (a: Attraction) => void
 }) {
   const [hovered, setHovered] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -306,6 +330,7 @@ function GemEntry({
   const isFree   = attraction.priceZAR === 0
   const hasUrl   = !!attraction.bookingInfo.url
   const canBook  = attraction.bookingInfo.available
+  const inTrip   = !!useTrip()[attraction.id]
 
   return (
     <div
@@ -465,7 +490,7 @@ function GemEntry({
             {/* Toggle details */}
             <button
               onClick={() => setExpanded(x => !x)}
-              style={{ background: 'transparent', border: 'none', padding: '5px 8px', cursor: 'pointer', fontFamily: TEXT_F, fontSize: 13, color: DIM, transition: 'color 0.15s' }}
+              style={{ background: 'transparent', border: 'none', padding: '5px 10px', minHeight: 40, cursor: 'pointer', fontFamily: TEXT_F, fontSize: 13, color: DIM, transition: 'color 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.color = TEXT }}
               onMouseLeave={e => { e.currentTarget.style.color = DIM }}
             >
@@ -475,26 +500,26 @@ function GemEntry({
             {/* Primary CTA */}
             {canBook ? (
               <button
-                onClick={() => onClaim(attraction)}
-                style={{ background: R, border: 'none', borderRadius: 4, padding: '7px 16px', cursor: 'pointer', fontFamily: MONO, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: INK, fontWeight: 500, transition: 'all 0.15s', whiteSpace: 'nowrap' }}
-                onMouseEnter={e => { e.currentTarget.style.background = TEXT }}
-                onMouseLeave={e => { e.currentTarget.style.background = R }}
+                onClick={() => onAddToTrip(attraction)}
+                style={{ background: inTrip ? 'transparent' : R, border: inTrip ? `1px solid ${R}` : 'none', borderRadius: 4, padding: '7px 16px', minHeight: 40, cursor: 'pointer', fontFamily: MONO, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: inTrip ? R : INK, fontWeight: 500, transition: 'all 0.15s', whiteSpace: 'nowrap' }}
+                onMouseEnter={e => { if (!inTrip) e.currentTarget.style.background = TEXT }}
+                onMouseLeave={e => { if (!inTrip) e.currentTarget.style.background = R }}
               >
-                {isUpcoming ? 'Book ahead' : 'Claim this spot'}
+                {inTrip ? '✓ In your trip' : isUpcoming ? 'Plan ahead' : 'Add to trip'}
               </button>
             ) : hasUrl ? (
               <a
                 href={attraction.bookingInfo.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ background: 'transparent', border: `1px solid rgba(145,112,67,0.45)`, borderRadius: 4, padding: '6px 15px', fontFamily: MONO, fontWeight: 500, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: TEXT, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-block' }}
+                style={{ background: 'transparent', border: `1px solid rgba(145,112,67,0.45)`, borderRadius: 4, padding: '6px 15px', minHeight: 40, fontFamily: MONO, fontWeight: 500, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: TEXT, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}
               >
                 Book directly ↗
               </a>
             ) : (
               <a
                 href={`tel:${attraction.bookingInfo.contact}`}
-                style={{ background: 'transparent', border: `1px solid rgba(166,169,154,0.7)`, borderRadius: 4, padding: '6px 15px', fontFamily: MONO, fontWeight: 500, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: DIM, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-block' }}
+                style={{ background: 'transparent', border: `1px solid rgba(166,169,154,0.7)`, borderRadius: 4, padding: '6px 15px', minHeight: 40, fontFamily: MONO, fontWeight: 500, fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: DIM, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}
               >
                 Plan your visit
               </a>
@@ -507,11 +532,57 @@ function GemEntry({
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Your trip — the gems saved so far
+// ─────────────────────────────────────────────────────────────────
+
+function TripSummary({ onOpen }: { onOpen: (a: Attraction) => void }) {
+  const trip = useTrip()
+  const items = ATTRACTIONS
+    .filter(a => trip[a.id])
+    .map(a => ({ a, item: trip[a.id]!, station: STATIONS.find(s => s.id === a.stationId) }))
+    .sort((x, y) => x.item.date.localeCompare(y.item.date))
+  if (!items.length) return null
+
+  return (
+    <section aria-label="Your trip" style={{ background: SURFACE, borderRadius: 6, padding: '18px 20px', marginBottom: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
+        <h3 style={{ fontFamily: DISPLAY, fontSize: 26, fontWeight: 400, color: TEXT, margin: 0, lineHeight: 1 }}>Your trip</h3>
+        <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: DIM }}>
+          {items.length} saved · nothing booked yet
+        </span>
+      </div>
+      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        {items.map(({ a, item, station }, i) => (
+          <li key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderTop: i === 0 ? 'none' : '1px solid rgba(145,112,67,0.2)', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => onOpen(a)}
+              style={{ flex: '1 1 220px', minWidth: 0, textAlign: 'left', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}
+            >
+              <div style={{ fontFamily: TEXT_F, fontSize: 14, fontWeight: 600, color: TEXT }}>{a.name}</div>
+              <div style={{ fontFamily: TEXT_F, fontSize: 12, color: DIM, marginTop: 2 }}>
+                {station?.name} · {formatTripDate(item.date)} · {item.guests} guest{item.guests !== 1 ? 's' : ''}
+              </div>
+            </button>
+            <button
+              onClick={() => removeFromTrip(a.id)}
+              aria-label={`Remove ${a.name} from your trip`}
+              style={{ background: 'transparent', border: '1px solid rgba(62,35,24,0.2)', borderRadius: 4, minHeight: 36, padding: '0 12px', cursor: 'pointer', fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: DIM }}
+            >
+              Remove
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Station section — collapsible chapter marker
 // ─────────────────────────────────────────────────────────────────
 
 function StationSection({
-  stationId, lang, awoken, entries, priceRange, categoryFilter, searchQuery, onClaim,
+  stationId, lang, awoken, entries, priceRange, categoryFilter, searchQuery, onAddToTrip,
 }: {
   stationId: string
   lang: Language
@@ -520,7 +591,7 @@ function StationSection({
   priceRange: [number, number]
   categoryFilter: string
   searchQuery: string
-  onClaim: (a: Attraction) => void
+  onAddToTrip: (a: Attraction) => void
 }) {
   const station = STATIONS.find(s => s.id === stationId)
   if (!station) return null
@@ -551,7 +622,7 @@ function StationSection({
         onClick={() => setOpen(o => !o)}
         style={{
           width: '100%', background: 'transparent', border: 'none',
-          cursor: 'pointer', padding: 0, marginBottom: open ? 12 : 0,
+          cursor: 'pointer', padding: 0, minHeight: 44, marginBottom: open ? 12 : 0,
           display: 'flex', alignItems: 'center', gap: 14,
           textAlign: 'left',
         }}
@@ -594,7 +665,7 @@ function StationSection({
         filtered.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {filtered.map((a, i) => (
-              <GemEntry key={a.id} attraction={a} index={i} isUpcoming={isUpcoming} onClaim={onClaim} />
+              <GemEntry key={a.id} attraction={a} index={i} isUpcoming={isUpcoming} onAddToTrip={onAddToTrip} />
             ))}
           </div>
         ) : entries.length === 0 ? (
@@ -631,8 +702,9 @@ function FilterDrawer({
   onClose: () => void
 }) {
   const isMobile = useIsMobile()
+  useEscape(onClose)
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(62,35,24,0.45)' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 350, background: 'rgba(62,35,24,0.45)' }}>
       <div onClick={e => e.stopPropagation()} style={{ position: 'absolute', top: 0, right: 0, width: isMobile ? '100%' : 340, height: '100%', background: VOID, borderLeft: `1px solid rgba(62,35,24,0.08)`, padding: isMobile ? '20px 18px' : '24px 28px', display: 'flex', flexDirection: 'column', gap: 28, overflowY: 'auto', animation: 'slideInRight 0.22s ease-out both' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontFamily: DISPLAY, fontSize: 30, fontWeight: 400, color: TEXT, lineHeight: 1 }}>Filters</span>
@@ -798,6 +870,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
       ) : (
       /* ══ Journal body ══ */
       <div style={{ padding: isMobile ? '20px 16px 32px' : '28px 36px 56px' }}>
+        <TripSummary onOpen={setBookingTarget} />
         {STATIONS.map(s => {
           const entries = byStation.get(s.id) ?? []
           if (entries.length === 0) return null
@@ -811,7 +884,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
               priceRange={priceRange}
               categoryFilter={categoryFilter}
               searchQuery={searchQuery}
-              onClaim={setBookingTarget}
+              onAddToTrip={setBookingTarget}
             />
           )
         })}

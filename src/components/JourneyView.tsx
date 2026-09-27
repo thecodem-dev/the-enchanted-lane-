@@ -15,7 +15,7 @@ import { Logo } from '@/components/ui/Logo'
 import { VideoModal } from '@/components/VideoModal'
 import { StationWeather } from '@/components/StationWeather'
 import { ChapterUnlockedBanner } from '@/components/ui/ChapterUnlockedBanner'
-import { useIsMobile } from '@/hooks/useIsMobile'
+import { useIsCompact, useIsMobile } from '@/hooks/useIsMobile'
 import { usePreferences } from '@/lib/preferences'
 import { V, S, T, A, D, R, MONO, SANS, DISPLAY } from '@/styles/tokens'
 import type { Language, Station } from '@/types'
@@ -54,7 +54,9 @@ export function JourneyView({
   onResetJourney,
   onSignOut,
 }: JourneyViewProps) {
-  const isMobile = useIsMobile()
+  // Compact (phones + tablets) gets the bottom-tab layout; panels still use their own phone breakpoint
+  const isMobile = useIsCompact()
+  const isPhone = useIsMobile()
   const { chapterAlerts } = usePreferences()
   const isComplete = stIdx >= STATIONS.length - 1 && !isMoving
   const currentStation = STATIONS[stIdx]
@@ -127,7 +129,7 @@ export function JourneyView({
               fontFamily: DISPLAY, fontSize: 20,
               fontWeight: 400, color: T, lineHeight: 1,
             }}>
-              Enchanted Line
+              Enchanted Lane
             </span>
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -184,7 +186,7 @@ export function JourneyView({
 
             <RouteProgress
               awoken={awoken} completed={completed} stations={STATIONS}
-              lang={lang} stIdx={stIdx} tProg={tProg} isMobile
+              lang={lang} stIdx={stIdx} tProg={tProg} isMobile={isPhone}
               onStationClick={s => { if (awoken.has(s.id)) onStationClick(s) }}
             />
           </>
@@ -242,7 +244,7 @@ export function JourneyView({
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <Logo className="h-9 w-9 ring-1 ring-brass/50" />
           <span style={{ fontFamily: DISPLAY, fontSize: 22, fontWeight: 400, color: T, lineHeight: 1 }}>
-            The Enchanted Line
+            The Enchanted Lane
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>

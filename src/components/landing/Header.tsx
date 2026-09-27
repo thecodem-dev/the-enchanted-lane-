@@ -48,7 +48,7 @@ export function Header() {
             <li key={item.href}>
               <a
                 href={item.href}
-                className="underline-offset-[6px] decoration-brass decoration-1 transition-colors hover:underline"
+                className="inline-block py-2 underline-offset-[6px] decoration-brass decoration-1 transition-colors hover:underline"
               >
                 {item.label}
               </a>

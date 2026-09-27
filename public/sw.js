@@ -1,5 +1,5 @@
 /**
- * The Enchanted Line — Service Worker
+ * The Enchanted Lane — Service Worker
  *
  * Strategy:
  *  · App shell (JS/CSS/HTML): Cache-first, populated on install

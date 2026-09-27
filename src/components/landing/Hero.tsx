@@ -65,7 +65,7 @@ export function Hero() {
           </a>
           <a
             href="#route"
-            className="text-label inline-flex items-center gap-2 text-cream/85 underline-offset-[6px] decoration-brass hover:text-cream hover:underline"
+            className="text-label inline-flex min-h-11 items-center gap-2 text-cream/85 underline-offset-[6px] decoration-brass hover:text-cream hover:underline"
           >
             See the route <ArrowDown size={15} strokeWidth={1.75} aria-hidden="true" />
           </a>

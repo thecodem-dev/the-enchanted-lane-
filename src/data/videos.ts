@@ -1,16 +1,22 @@
 /**
  * Station video data — one heritage clip per station.
  *
- * Replace `videoId` values with real YouTube IDs for ~5-minute heritage clips.
- * The id must match the station id in stations.ts.
+ * A station plays either a local file (`src`, imported from src/assets/videos)
+ * or a YouTube clip (`videoId`). `src` wins when both are set.
+ * The key must match the station id in stations.ts.
  */
+import pretoriaDocumentary from '@/assets/videos/pretoria-documentary.mp4'
+
 export interface StationVideo {
-  videoId: string
   title: string
+  /** Local video file — played in-app with the browser's own player */
+  src?: string
+  /** YouTube video id — played in an embedded YouTube player */
+  videoId?: string
 }
 
 export const STATION_VIDEOS: Record<string, StationVideo> = {
-  pretoria:       { videoId: 'Hv6EMd8dlQk', title: 'Pretoria — Jacaranda City'       },
+  pretoria:       { src: pretoriaDocumentary, title: 'Pretoria — Jacaranda City' },
   johannesburg:   { videoId: 'LBn4mM7sIgI', title: 'Johannesburg — City of Gold'     },
   klerksdorp:     { videoId: 'dQw4w9WgXcQ', title: 'Klerksdorp — Ancient Spheres'    },
   kimberley:      { videoId: 'dQw4w9WgXcQ', title: 'Kimberley — Diamond Capital'     },

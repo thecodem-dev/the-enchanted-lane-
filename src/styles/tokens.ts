@@ -1,7 +1,7 @@
 /**
  * Design tokens — single source of truth for the Antique Brass palette and typefaces.
  *
- * Matches the Enchanted Line landing page so both surfaces read as one brand.
+ * Matches the Enchanted Lane landing page so both surfaces read as one brand.
  * This is a LIGHT palette: dark espresso text on cream / tan surfaces.
  *
  * Contrast notes (WCAG, against cream #FAF4E0 / tan #D7CBB5):
