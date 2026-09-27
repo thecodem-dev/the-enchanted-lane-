@@ -45,7 +45,7 @@ export function SignUpPage() {
     try {
       const result = await signUp(firstName, lastName, email, password)
       if (result.needsEmailConfirmation) {
-        setMessage('Account created. Check your email to confirm it, then sign in.')
+        navigate(SIGN_IN_PATH, { replace: true })
       } else {
         navigate('/board', { replace: true })
       }
