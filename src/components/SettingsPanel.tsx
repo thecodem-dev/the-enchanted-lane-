@@ -1,6 +1,7 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
 import { LANGUAGES, STATIONS, shortStationName } from '@/data/stations'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { Toggle } from '@/components/ui/Toggle'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useOffline } from '@/hooks/useOffline'
 import { getSession } from '@/lib/auth'
@@ -70,27 +71,6 @@ function SettingRow({ label, hint, control, first = false }: { label: string; hi
       </div>
       <div style={{ flexShrink: 0 }}>{control}</div>
     </div>
-  )
-}
-
-/** Accessible on/off switch */
-function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      role="switch"
-      aria-checked={checked}
-      aria-label={label}
-      onClick={() => onChange(!checked)}
-      style={{
-        position: 'relative', width: 44, height: 24, borderRadius: 12, padding: 0, cursor: 'pointer',
-        background: checked ? R : 'rgba(62,35,24,0.18)', border: 'none', transition: 'background 0.2s',
-      }}
-    >
-      <span style={{
-        position: 'absolute', top: 3, left: checked ? 23 : 3, width: 18, height: 18, borderRadius: '50%',
-        background: V, boxShadow: '0 1px 3px rgba(62,35,24,0.3)', transition: 'left 0.2s',
-      }} />
-    </button>
   )
 }
 

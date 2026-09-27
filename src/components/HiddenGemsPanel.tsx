@@ -10,6 +10,8 @@ import {
 } from '@/data/attractions'
 import { ATTRACTION_PHOTOS } from '@/data/attractionPhotos'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import { GemMatcher } from '@/components/GemMatcher'
+import { CORRIDOR_GEMS } from '@/data/corridorGems'
 import type { Language } from '@/types'
 
 import { V as VOID, S as SURFACE, T as TEXT, A as ACCENT, G as SUPPORT, D as DIM, RV as REVEAL, R, INK, DISPLAY, TEXT_F, MONO } from '@/styles/tokens'
@@ -676,6 +678,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
   const [categoryFilter, setCategoryFilter] = useState<CatFilter>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
+  const [view, setView] = useState<'sites' | 'matcher'>('sites')
   const [bookingTarget, setBookingTarget] = useState<Attraction | null>(null)
 
   // Group attractions by station, preserving journey order
@@ -722,7 +725,35 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
           )}
         </div>
 
-        {/* Search + filter row */}
+        {/* Heritage sites | Gem matcher */}
+        <div role="tablist" aria-label="Hidden gems" style={{ display: 'flex', gap: 4, marginBottom: view === 'sites' ? 14 : 0, borderBottom: '1px solid rgba(145,112,67,0.25)' }}>
+          {([
+            ['sites', 'Heritage sites', ATTRACTIONS.length],
+            ['matcher', 'Gem matcher', CORRIDOR_GEMS.length],
+          ] as const).map(([id, label, count]) => {
+            const active = view === id
+            return (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={active}
+                onClick={() => setView(id)}
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  borderBottom: `2px solid ${active ? R : 'transparent'}`, marginBottom: -1,
+                  padding: '10px 14px', display: 'inline-flex', alignItems: 'center', gap: 8,
+                  fontFamily: TEXT_F, fontSize: 14, fontWeight: active ? 600 : 400, color: active ? TEXT : DIM,
+                }}
+              >
+                {label}
+                <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 9, color: active ? R : DIM, background: active ? 'rgba(136,82,61,0.1)' : 'rgba(62,35,24,0.06)', borderRadius: 8, padding: '1px 6px' }}>{count}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Search + filter row (heritage sites only) */}
+        {view === 'sites' && (
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Search */}
           <div style={{ flex: 1, position: 'relative' }}>
@@ -757,9 +788,15 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
             {filtersActive && <span style={{ color: R, fontFamily: MONO, fontWeight: 500, fontSize: 9 }}>ON</span>}
           </button>
         </div>
+        )}
       </div>
 
-      {/* ══ Journal body ══ */}
+      {view === 'matcher' ? (
+        <div style={{ padding: isMobile ? '20px 16px 32px' : '28px 36px 56px' }}>
+          <GemMatcher />
+        </div>
+      ) : (
+      /* ══ Journal body ══ */
       <div style={{ padding: isMobile ? '20px 16px 32px' : '28px 36px 56px' }}>
         {STATIONS.map(s => {
           const entries = byStation.get(s.id) ?? []
@@ -792,6 +829,7 @@ export function HiddenGemsPanel({ lang, awoken }: HiddenGemsPanelProps) {
           </span>
         </div>
       </div>
+      )}
 
       {/* Modals */}
       {filterOpen && (

@@ -18,6 +18,7 @@ import { OfflineBanner } from '@/components/OfflineBanner'
 import { useTrainAnimation } from '@/hooks/useTrainAnimation'
 import { getSession, signOut } from '@/lib/auth'
 import { setPreference, usePreferences } from '@/lib/preferences'
+import { clearThemaChat } from '@/lib/themaChat'
 import { BOARD_PATH, LANDING_PATH, SIGN_IN_PATH, navigate, redirect, routeFromPath } from '@/lib/navigation'
 import type { Language, Phase } from '@/types'
 
@@ -74,6 +75,7 @@ export default function App() {
   const handleSignOut = () => {
     signOut()
     resetJourney()
+    clearThemaChat()
     navigate(LANDING_PATH)
   }
 

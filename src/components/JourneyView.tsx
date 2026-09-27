@@ -10,6 +10,7 @@ import { PassportPanel } from '@/components/PassportPanel'
 import { ThemaPanel } from '@/components/ThemaPanel'
 import { SettingsPanel } from '@/components/SettingsPanel'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { ThemaLauncher } from '@/components/ThemaLauncher'
 import { Logo } from '@/components/ui/Logo'
 import { VideoModal } from '@/components/VideoModal'
 import { StationWeather } from '@/components/StationWeather'
@@ -189,7 +190,7 @@ export function JourneyView({
           </>
         ) : (
           <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            {page}
+            <div style={{ paddingBottom: activeNav === 'thema' ? 0 : 72 }}>{page}</div>
           </div>
         )}
 
@@ -200,6 +201,15 @@ export function JourneyView({
             station={activeStation} lang={lang} completed={completed}
             isComplete={isComplete} onClose={onCloseChapter} onContinue={onContinue}
             stIdx={stIdx} isMobile
+          />
+        )}
+
+        {/* Ask Thema — above the tab bar (and the route strip and map credit on the map); hidden while the chapter sheet is up */}
+        {activeNav !== 'thema' && !(activeNav === 'map' && activeStation) && (
+          <ThemaLauncher
+            right={12}
+            bottom={activeNav === 'map' ? 160 : 68}
+            onExpand={() => setActiveNav('thema')}
           />
         )}
 
@@ -355,9 +365,21 @@ export function JourneyView({
                 onStationClick={s => { if (awoken.has(s.id)) onStationClick(s); openVideo(s) }}
               />
             </div>
-          ) : page}
+          ) : (
+            // room at the bottom so the floating Ask Thema button never covers the last item
+            <div style={{ paddingBottom: activeNav === 'thema' ? 0 : 72 }}>{page}</div>
+          )}
         </div>
       </div>
+
+      {/* Ask Thema — clears the route strip on the map and the chapter panel when it's open */}
+      {activeNav !== 'thema' && (
+        <ThemaLauncher
+          right={activeNav === 'map' && activeStation ? 384 : 24}
+          bottom={activeNav === 'map' ? 92 : 24}
+          onExpand={() => setActiveNav('thema')}
+        />
+      )}
 
       {videoStation && (
         <VideoModal

@@ -112,6 +112,18 @@ body {
   to   { opacity: 1; transform: translateX(0); }
 }
 
+/* Thema's typing indicator */
+@keyframes themaDot {
+  0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+
+/* Thema's floating chat panel */
+@keyframes themaPanelIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @keyframes gemDrop {
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
