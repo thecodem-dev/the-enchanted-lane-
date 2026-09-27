@@ -1,13 +1,15 @@
 import { Logo } from '@/components/ui/Logo'
 import { V, S, T, D, R, DISPLAY, SANS, MONO } from '@/styles/tokens'
 
-export type NavItem = 'map' | 'passport' | 'gems' | 'quiz' | 'thema' | 'settings'
+export type NavItem = 'map' | 'alerts' | 'passport' | 'gems' | 'quiz' | 'thema' | 'settings'
 
 interface DashboardSidebarProps {
   awoken: Set<string>
   completed: Set<string>
   activeNav: NavItem
   onNavChange: (nav: NavItem) => void
+  /** Unread journey updates */
+  unreadAlerts: number
 }
 
 interface NavEntry {
@@ -19,10 +21,11 @@ interface NavEntry {
 }
 
 /** The journey's pages — shared by the desktop sidebar and the mobile bottom bar */
-function buildNav(completed: Set<string>, awoken: Set<string>): NavEntry[] {
+function buildNav(completed: Set<string>, awoken: Set<string>, unreadAlerts: number): NavEntry[] {
   const quizUnlocked = awoken.size >= 1
   return [
     { id: 'map',      label: 'Journey Map',     short: 'Map' },
+    { id: 'alerts',   label: 'Journey Alerts',  short: 'Alerts',   badge: unreadAlerts > 0 ? String(unreadAlerts) : undefined },
     { id: 'passport', label: 'Passport Stamps', short: 'Passport', badge: completed.size > 0 ? String(completed.size) : undefined },
     { id: 'gems',     label: 'Hidden Gems',     short: 'Gems',     badge: awoken.size > 0 ? String(awoken.size) : undefined },
     { id: 'quiz',     label: 'Quiz',            short: 'Quiz',     badge: quizUnlocked ? undefined : 'locked' },
@@ -78,6 +81,13 @@ function SidebarIcon({ id, active }: { id: NavItem; active: boolean }) {
           <circle cx="13.5" cy="7.5" r="0.6" fill={c} />
         </svg>
       )
+    case 'alerts':
+      return (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 1.8c-2.2 0-3.8 1.7-3.8 3.9v2.6L3 10.6h10l-1.2-2.3V5.7C11.8 3.5 10.2 1.8 8 1.8z" stroke={c} strokeWidth="1.2" strokeLinejoin="round" />
+          <path d="M6.3 12.4a1.8 1.8 0 0 0 3.4 0" stroke={c} strokeWidth="1.2" strokeLinecap="round" />
+        </svg>
+      )
     case 'settings':
       return (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -102,9 +112,10 @@ export function DashboardSidebar({
   awoken,
   activeNav,
   onNavChange,
+  unreadAlerts,
 }: DashboardSidebarProps) {
   const quizUnlocked = awoken.size >= 1
-  const nav = buildNav(completed, awoken)
+  const nav = buildNav(completed, awoken, unreadAlerts)
 
   return (
     <div style={{
@@ -225,8 +236,13 @@ export function DashboardSidebar({
 /**
  * MobileNavBar — the sidebar's pages as a bottom tab bar for phones.
  */
-export function MobileNavBar({ completed, awoken, activeNav, onNavChange }: DashboardSidebarProps) {
-  const nav = buildNav(completed, awoken)
+export function MobileNavBar({
+  completed, awoken, activeNav, onNavChange, unreadAlerts, slim = false,
+}: DashboardSidebarProps & {
+  /** Phones held sideways: icon and label side by side in a shorter bar */
+  slim?: boolean
+}) {
+  const nav = buildNav(completed, awoken, unreadAlerts)
   return (
     <nav
       aria-label="Main menu"
@@ -246,8 +262,8 @@ export function MobileNavBar({ completed, awoken, activeNav, onNavChange }: Dash
             aria-current={isActive ? 'page' : undefined}
             aria-label={item.label}
             style={{
-              position: 'relative', minHeight: 56, padding: '8px 2px 7px',
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4,
+              position: 'relative', minHeight: slim ? 46 : 56, padding: slim ? '0 2px' : '8px 2px 7px',
+              display: 'flex', flexDirection: slim ? 'row' : 'column', alignItems: 'center', justifyContent: 'center', gap: slim ? 7 : 4,
               background: isActive ? 'rgba(145,112,67,0.13)' : 'transparent',
               border: 'none', borderTop: `2px solid ${isActive ? R : 'transparent'}`,
               cursor: 'pointer', opacity: locked ? 0.5 : 1,
@@ -259,7 +275,7 @@ export function MobileNavBar({ completed, awoken, activeNav, onNavChange }: Dash
             </span>
             {item.badge && !locked && (
               <span style={{
-                position: 'absolute', top: 5, left: 'calc(50% + 7px)',
+                position: 'absolute', top: slim ? 4 : 5, left: slim ? 'calc(50% - 4px)' : 'calc(50% + 7px)',
                 minWidth: 15, height: 15, borderRadius: 8, padding: '0 4px',
                 background: R, color: V, fontFamily: MONO, fontSize: 9, fontWeight: 600,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',

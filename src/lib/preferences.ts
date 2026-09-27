@@ -12,6 +12,7 @@ import type { Language } from '@/types'
 
 export type TrainSpeed = 'leisurely' | 'standard' | 'express'
 export type TemperatureUnit = 'c' | 'f'
+export type DelayThreshold = 5 | 15 | 30
 
 export interface Preferences {
   language: Language
@@ -21,6 +22,14 @@ export interface Preferences {
   reduceMotion: boolean
   chapterAlerts: boolean
   autoplayVideos: boolean
+  /** Delay updates and the running-late banner */
+  notifyDelays: boolean
+  /** "Arriving soon" updates */
+  notifyArriving: boolean
+  /** Only flag delays at least this many minutes */
+  delayThreshold: DelayThreshold
+  /** Also show updates as system notifications when the app is in the background */
+  systemNotifications: boolean
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
@@ -31,6 +40,10 @@ export const DEFAULT_PREFERENCES: Preferences = {
   reduceMotion: false,
   chapterAlerts: true,
   autoplayVideos: true,
+  notifyDelays: true,
+  notifyArriving: true,
+  delayThreshold: 15,
+  systemNotifications: false,
 }
 
 const STORAGE_KEY = 'enchanted-line:preferences'

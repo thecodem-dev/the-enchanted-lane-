@@ -13,6 +13,8 @@ interface ChapterPanelProps {
   isMobile: boolean
   onClose: () => void
   onContinue: () => void
+  /** Phones: height of the bar the sheet sits above (the bottom tab bar) */
+  sheetBottom?: number
 }
 
 export function ChapterPanel({
@@ -24,13 +26,14 @@ export function ChapterPanel({
   isMobile,
   onClose,
   onContinue,
+  sheetBottom = 56,
 }: ChapterPanelProps) {
   const isStationComplete = completed.has(station.id)
 
   const panelStyle: React.CSSProperties = isMobile
     ? {
         // Sits above the mobile bottom tab bar (56px + safe area) so navigation stays reachable
-        position: 'fixed', bottom: 'calc(56px + env(safe-area-inset-bottom))', left: 0, right: 0,
+        position: 'fixed', bottom: `calc(${sheetBottom}px + env(safe-area-inset-bottom))`, left: 0, right: 0,
         maxHeight: '62dvh', zIndex: 100,
         boxShadow: '0 -8px 24px rgba(62,35,24,0.14)',
         borderTop: `1px solid rgba(145,112,67,0.39)`,

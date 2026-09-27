@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { STATIONS } from '@/data/stations'
 import { usePreferences, type TrainSpeed } from '@/lib/preferences'
 import { clearJourney, loadJourney, saveJourney } from '@/lib/journeyStore'
+import { clearReadUpdates } from '@/lib/notificationsStore'
 import type { Station } from '@/types'
 
 /** Progress per frame for each Settings › Train speed option (at 60 fps) */
@@ -123,6 +124,7 @@ export function useTrainAnimation(): UseTrainAnimationReturn {
 
   const resetJourney = useCallback(() => {
     clearJourney()
+    clearReadUpdates()
     movingRef.current = false
     progressRef.current = 0
     stIdxRef.current = 0

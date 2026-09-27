@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import heroVideo from '@/assets/landing/enchanted-header-vid2.webm'
 import { Logo } from '@/components/ui/Logo'
-import { useIsMobile } from '@/hooks/useIsMobile'
+import { useIsMobile, useIsShort } from '@/hooks/useIsMobile'
 import { SignInError, isValidEmail, signIn } from '@/lib/auth'
 import { BOARD_PATH, LANDING_PATH, goToLanding, navigate } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
@@ -26,7 +26,9 @@ const inputClass =
  * footage fills the left half on larger screens.
  */
 export function SignInPage() {
-  const isMobile = useIsMobile()
+  const isShort = useIsShort()
+  // Phones, and phones held sideways, get the form alone
+  const isMobile = useIsMobile() || isShort
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -53,7 +55,7 @@ export function SignInPage() {
   }
 
   return (
-    <div className="landing grid min-h-[100svh] bg-cream text-espresso md:grid-cols-[1.1fr_1fr]">
+    <div className={`landing grid min-h-[100svh] bg-cream text-espresso ${isMobile ? '' : 'md:grid-cols-[1.1fr_1fr]'}`}>
       {/* ── Left: the hero footage, continuing the landing page ── */}
       {!isMobile && (
         <aside className="relative isolate flex flex-col justify-between overflow-hidden bg-espresso p-10 text-cream lg:p-14">

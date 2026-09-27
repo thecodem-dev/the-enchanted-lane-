@@ -5,7 +5,7 @@ import { Toggle } from '@/components/ui/Toggle'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useOffline } from '@/hooks/useOffline'
 import { getSession } from '@/lib/auth'
-import { resetPreferences, setPreference, usePreferences, type TemperatureUnit, type TrainSpeed } from '@/lib/preferences'
+import { resetPreferences, setPreference, usePreferences, type DelayThreshold, type TemperatureUnit, type TrainSpeed } from '@/lib/preferences'
 import { V, S, T, A, D, R, DISPLAY, MONO, SANS } from '@/styles/tokens'
 import type { Language } from '@/types'
 
@@ -120,6 +120,18 @@ const TRAIN_SPEEDS: { value: TrainSpeed; label: string }[] = [
   { value: 'express',   label: 'Express' },
 ]
 
+const DELAY_THRESHOLDS: { value: `${DelayThreshold}`; label: string }[] = [
+  { value: '5',  label: '5 min' },
+  { value: '15', label: '15 min' },
+  { value: '30', label: '30 min' },
+]
+
+/** Browser notification support and permission, as a short status line */
+function notificationStatus(): { supported: boolean; permission: NotificationPermission | 'unsupported' } {
+  if (!('Notification' in window)) return { supported: false, permission: 'unsupported' }
+  return { supported: true, permission: Notification.permission }
+}
+
 const TEMPERATURE_UNITS: { value: TemperatureUnit; label: string }[] = [
   { value: 'c', label: '°C' },
   { value: 'f', label: '°F' },
@@ -136,6 +148,16 @@ export function SettingsPanel({ lang, setLang, stIdx, completed, onResetJourney,
   const session = getSession()
   const [confirmingReset, setConfirmingReset] = useState(false)
   const [confirmingDefaults, setConfirmingDefaults] = useState(false)
+  const [notify, setNotify] = useState(notificationStatus)
+
+  // Turning phone notifications on asks the browser for permission first
+  const toggleSystemNotifications = async (on: boolean) => {
+    if (!on) return setPreference('systemNotifications', false)
+    if (!notify.supported) return
+    const permission = notify.permission === 'granted' ? 'granted' : await Notification.requestPermission()
+    setNotify({ supported: true, permission })
+    setPreference('systemNotifications', permission === 'granted')
+  }
   const current = STATIONS[stIdx]
 
   return (
@@ -241,6 +263,48 @@ export function SettingsPanel({ lang, setLang, stIdx, completed, onResetJourney,
             label="Temperature"
             hint="Used on the map and in the top bar."
             control={<Segmented label="Temperature unit" value={prefs.temperatureUnit} options={TEMPERATURE_UNITS} onChange={v => setPreference('temperatureUnit', v)} />}
+          />
+        </Section>
+
+        {/* ── Notifications ── */}
+        <Section title="Notifications" description="Updates about your train’s schedule and any delays along the way.">
+          <SettingRow
+            first
+            label="Delay alerts"
+            hint="Updates when the train runs late, and a ‘Running late’ banner on the map."
+            control={<Toggle label="Delay alerts" checked={prefs.notifyDelays} onChange={v => setPreference('notifyDelays', v)} />}
+          />
+          <SettingRow
+            label="Only for delays of at least"
+            hint="Smaller delays stay quiet."
+            control={
+              <Segmented
+                label="Delay threshold"
+                value={`${prefs.delayThreshold}` as `${DelayThreshold}`}
+                options={DELAY_THRESHOLDS}
+                onChange={v => setPreference('delayThreshold', Number(v) as DelayThreshold)}
+              />
+            }
+          />
+          <SettingRow
+            label="Arriving soon"
+            hint="A heads-up about 15 minutes before each station."
+            control={<Toggle label="Arriving soon" checked={prefs.notifyArriving} onChange={v => setPreference('notifyArriving', v)} />}
+          />
+          <SettingRow
+            label="Phone notifications"
+            hint={
+              !notify.supported ? 'This browser doesn’t support notifications.'
+              : notify.permission === 'denied' ? 'Notifications are blocked for this site — allow them in your browser settings.'
+              : 'Show updates on your device while the app is in the background.'
+            }
+            control={
+              <Toggle
+                label="Phone notifications"
+                checked={prefs.systemNotifications && notify.permission === 'granted'}
+                onChange={toggleSystemNotifications}
+              />
+            }
           />
         </Section>
 

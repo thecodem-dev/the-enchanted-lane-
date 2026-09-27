@@ -88,7 +88,7 @@ export function VideoModal({
         </div>
 
         {/* Video embed */}
-        <div style={{ position: 'relative', paddingBottom: '52%', background: S }}>
+        <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', maxHeight: '60dvh', background: S }}>
           {vid?.src ? (
             <video
               key={vid.src}

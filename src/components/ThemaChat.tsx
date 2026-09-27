@@ -38,8 +38,12 @@ function Formatted({ text }: { text: string }) {
 }
 
 interface ThemaChatProps {
-  /** Height of the message area */
+  /**
+   * Height of the message area — or 'fill' to take whatever space the parent
+   * (a flex column with a max height) leaves, up to `maxHeight`
+   */
   height: number | string
+  maxHeight?: number | string
   /** Show the starter questions while the chat is fresh */
   showSuggestions?: boolean
   autoFocus?: boolean
@@ -49,7 +53,8 @@ interface ThemaChatProps {
  * ThemaChat — the conversation itself. Used full-size on the Thema page and
  * compact in the floating chat panel; both share one conversation.
  */
-export function ThemaChat({ height, showSuggestions = true, autoFocus = false }: ThemaChatProps) {
+export function ThemaChat({ height, maxHeight, showSuggestions = true, autoFocus = false }: ThemaChatProps) {
+  const fill = height === 'fill'
   const { messages, typing } = useThemaChat()
   const [draft, setDraft] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -67,14 +72,17 @@ export function ThemaChat({ height, showSuggestions = true, autoFocus = false }:
   const fresh = messages.length === 1
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, fontFamily: SANS }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, fontFamily: SANS, ...(fill ? { flex: 1 } : {}) }}>
       {/* Messages */}
       <div
         ref={scrollRef}
         role="log"
         aria-live="polite"
         aria-label="Conversation with Thema"
-        style={{ height, overflowY: 'auto', padding: '16px 16px 8px', display: 'flex', flexDirection: 'column', gap: 12 }}
+        style={{
+          ...(fill ? { flex: '1 1 auto', minHeight: 48, maxHeight } : { height }),
+          overflowY: 'auto', padding: '16px 16px 8px', display: 'flex', flexDirection: 'column', gap: 12,
+        }}
       >
         {messages.map(m => m.from === 'thema' ? (
           <div key={m.id} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', maxWidth: '88%' }}>
@@ -126,7 +134,7 @@ export function ThemaChat({ height, showSuggestions = true, autoFocus = false }:
       </div>
 
       {/* Composer */}
-      <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1px solid rgba(145,112,67,0.2)', background: S }}>
+      <form onSubmit={onSubmit} style={{ display: 'flex', gap: 8, padding: 12, flexShrink: 0, borderTop: '1px solid rgba(145,112,67,0.2)', background: S }}>
         <label htmlFor="thema-input" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
           Message Thema
         </label>
@@ -158,7 +166,7 @@ export function ThemaChat({ height, showSuggestions = true, autoFocus = false }:
           <ArrowUp size={18} strokeWidth={2} />
         </button>
       </form>
-      <p style={{ margin: 0, padding: '0 12px 10px', background: S, fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase', color: D, textAlign: 'center' }}>
+      <p style={{ margin: 0, padding: '0 12px 10px', background: S, flexShrink: 0, fontFamily: MONO, fontWeight: 500, fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase', color: D, textAlign: 'center' }}>
         Thema never needs your personal details
       </p>
     </div>

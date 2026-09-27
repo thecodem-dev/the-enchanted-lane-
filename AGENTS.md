@@ -27,6 +27,7 @@ The Vite dev server runs on port **8443** by default (configurable via the `PORT
 | `src/lib/preferences.ts` | Passenger settings (language, train speed, weather, motion…) saved on the device; `usePreferences()` |
 | `src/lib/journeyStore.ts` | Journey progress (station, seals, boarded) saved as the passenger travels — sync point for Supabase |
 | `src/lib/tripStore.ts` | Hidden gems saved to the passenger's trip (date, guests, notes) — sync point for Supabase |
+| `src/lib/schedule.ts` | Timetable + journey updates (delays, arrivals) — **demo feed**; swap for the rail partner's live feed at launch |
 | `src/components/landing/` | Marketing landing page (formerly the separate enchanted-lane-landing project) |
 | `src/styles/tokens.ts` | Antique Brass palette and fonts used by app components |
 | `src/main.tsx` | React entry point |

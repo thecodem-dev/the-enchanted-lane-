@@ -17,12 +17,12 @@ export interface StationVideo {
 
 export const STATION_VIDEOS: Record<string, StationVideo> = {
   pretoria:       { src: pretoriaDocumentary, title: 'Pretoria — Jacaranda City' },
-  johannesburg:   { videoId: 'LBn4mM7sIgI', title: 'Johannesburg — City of Gold'     },
-  klerksdorp:     { videoId: 'dQw4w9WgXcQ', title: 'Klerksdorp — Ancient Spheres'    },
-  kimberley:      { videoId: 'dQw4w9WgXcQ', title: 'Kimberley — Diamond Capital'     },
-  de_aar:         { videoId: 'dQw4w9WgXcQ', title: 'De Aar — Heart of the Rails'     },
-  beaufort_west:  { videoId: 'dQw4w9WgXcQ', title: 'Beaufort West — Karoo Gateway'   },
-  matjiesfontein: { videoId: 'dQw4w9WgXcQ', title: 'Matjiesfontein — Frozen in Time' },
-  worcester:      { videoId: 'dQw4w9WgXcQ', title: 'Worcester — Valley of Vineyards' },
-  cape_town:      { videoId: 'CZXLMmvIJpU', title: 'Cape Town — Mother City'         },
+  johannesburg:   { videoId: '0VXlI9cqXAA', title: 'Johannesburg — City of Gold'     },
+  klerksdorp:     { videoId: 'vlxsCcK-D_8', title: 'Klerksdorp — Ancient Spheres'    },
+  kimberley:      { videoId: 'Qg8iJF0-0F8', title: 'Kimberley — Diamond Capital'     },
+  de_aar:         { videoId: 'nVj9j9FeHsI', title: 'De Aar — Heart of the Rails'     },
+  beaufort_west:  { videoId: 'gpzw9bQgm6k', title: 'Beaufort West — Karoo Gateway'   },
+  matjiesfontein: { videoId: 'CE4QzbuUB0I', title: 'Matjiesfontein — Frozen in Time' },
+  worcester:      { videoId: 'Ex4tKjt2ClE', title: 'Worcester — Valley of Vineyards' },
+  cape_town:      { videoId: 'Py4NpNQq9_w', title: 'Cape Town — Mother City'         },
 }

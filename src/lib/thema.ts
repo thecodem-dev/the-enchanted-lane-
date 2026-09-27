@@ -33,6 +33,7 @@ const TOPIC_KEYWORDS = [
   'tour', 'ticket', 'hello', 'hi', 'sawubona', 'dumela', 'molo', 'tsela', 'indlela',
   'museum', 'history', 'heritage', 'weather', 'quiz', 'passport', 'seal', 'stamp',
   'coffee', 'wine', 'stay', 'eat', 'visit', 'see', 'thema', 'rhino', 'journey',
+  'delay', 'delayed', 'late', 'schedule', 'timetable', 'arrive', 'arrival', 'when',
 ]
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -166,6 +167,9 @@ function topicReply(text: string): string | null {
   }
   if (/\b(hotel|stay|overnight|sleep)\b/.test(text)) {
     return ['For a night off the train:', '', ...pickGems(['boutique_stay', 'overnight']), '', 'And in Matjiesfontein, the **Lord Milner Hotel** is a Victorian classic.'].join('\n')
+  }
+  if (/\b(delay|delayed|late|schedule|timetable|arrive|arrival|when)\b/.test(text)) {
+    return 'Your train’s timetable, expected arrival times and any delays are on the **Journey Alerts** page — look for the bell in the menu.'
   }
   if (/\bweather\b/.test(text)) {
     return 'Live weather for every stop is on the journey map, and the current station’s forecast sits in the top bar.'

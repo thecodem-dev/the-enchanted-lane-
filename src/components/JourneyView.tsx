@@ -11,11 +11,14 @@ import { ThemaPanel } from '@/components/ThemaPanel'
 import { SettingsPanel } from '@/components/SettingsPanel'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ThemaLauncher } from '@/components/ThemaLauncher'
+import { NotificationsPanel } from '@/components/NotificationsPanel'
+import { useJourneyUpdates, useSystemNotifications } from '@/hooks/useJourneyUpdates'
+import { currentDelay, lateness } from '@/lib/schedule'
 import { Logo } from '@/components/ui/Logo'
 import { VideoModal } from '@/components/VideoModal'
 import { StationWeather } from '@/components/StationWeather'
 import { ChapterUnlockedBanner } from '@/components/ui/ChapterUnlockedBanner'
-import { useIsCompact, useIsMobile } from '@/hooks/useIsMobile'
+import { useIsCompact, useIsMobile, useIsShort } from '@/hooks/useIsMobile'
 import { usePreferences } from '@/lib/preferences'
 import { V, S, T, A, D, R, MONO, SANS, DISPLAY } from '@/styles/tokens'
 import type { Language, Station } from '@/types'
@@ -57,10 +60,34 @@ export function JourneyView({
   // Compact (phones + tablets) gets the bottom-tab layout; panels still use their own phone breakpoint
   const isMobile = useIsCompact()
   const isPhone = useIsMobile()
-  const { chapterAlerts } = usePreferences()
+  // Phones held sideways: no route strip and a slimmer tab bar, so the map keeps some height
+  const isShort = useIsShort()
+  const navHeight = isShort ? 46 : 56
   const isComplete = stIdx >= STATIONS.length - 1 && !isMoving
   const currentStation = STATIONS[stIdx]
   const [activeNav, setActiveNav] = useState<NavItem>('map')
+  const { chapterAlerts, notifyDelays, delayThreshold } = usePreferences()
+
+  // Journey updates (demo feed) — unread badge, background notifications, running-late pill
+  const { updates, unread, read } = useJourneyUpdates(stIdx, isMoving, tProg)
+  useSystemNotifications(updates)
+  const delay = currentDelay(stIdx, isMoving)
+  const showDelay = notifyDelays && delay >= delayThreshold && !isComplete
+  const delayPill = showDelay && (
+    <button
+      onClick={() => setActiveNav('alerts')}
+      aria-label={`Train running ${delay} minutes late — view journey alerts`}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 7, minHeight: 30, padding: '0 12px',
+        borderRadius: 15, border: 'none', background: R, color: V, cursor: 'pointer',
+        fontFamily: MONO, fontWeight: 500, fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+        boxShadow: '0 2px 8px rgba(136,82,61,0.3)',
+      }}
+    >
+      <span aria-hidden="true" style={{ width: 6, height: 6, borderRadius: '50%', background: V, animation: 'glowPulse 1.4s ease-in-out infinite' }} />
+      Running {lateness(delay).toLowerCase()}
+    </button>
+  )
   const [videoStation, setVideoStation] = useState<Station | null>(null)
 
   const videoIdx = videoStation ? STATIONS.findIndex(s => s.id === videoStation.id) : -1
@@ -97,6 +124,10 @@ export function JourneyView({
       <div style={slideIn}>
         <ThemaPanel />
       </div>
+    ) : activeNav === 'alerts' ? (
+      <div style={slideIn}>
+        <NotificationsPanel stIdx={stIdx} isComplete={isComplete} updates={updates} read={read} />
+      </div>
     ) : activeNav === 'settings' ? (
       <div style={slideIn}>
         <SettingsPanel
@@ -115,9 +146,10 @@ export function JourneyView({
         style={{ background: V, fontFamily: SANS }}
         className="w-full h-screen flex flex-col overflow-hidden"
       >
-        {/* Mobile top bar */}
+        {/* Mobile top bar — padded below the status bar on notched phones */}
         <div style={{
-          height: 48,
+          height: `calc(${isShort ? 44 : 48}px + env(safe-area-inset-top))`,
+          paddingTop: 'env(safe-area-inset-top)', boxSizing: 'border-box',
           borderBottom: `1px solid rgba(145,112,67,0.23)`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           paddingLeft: 16, paddingRight: 16, flexShrink: 0,
@@ -159,6 +191,7 @@ export function JourneyView({
                 onStationClick={onStationClick}
                 onVideoClick={openVideo}
               />
+              {delayPill && <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 10 }}>{delayPill}</div>}
               {newlyAwoken && chapterAlerts && (
                 <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
                   <ChapterUnlockedBanner />
@@ -184,11 +217,13 @@ export function JourneyView({
               )}
             </div>
 
-            <RouteProgress
-              awoken={awoken} completed={completed} stations={STATIONS}
-              lang={lang} stIdx={stIdx} tProg={tProg} isMobile={isPhone}
-              onStationClick={s => { if (awoken.has(s.id)) onStationClick(s) }}
-            />
+            {!isShort && (
+              <RouteProgress
+                awoken={awoken} completed={completed} stations={STATIONS}
+                lang={lang} stIdx={stIdx} tProg={tProg} isMobile={isPhone}
+                onStationClick={s => { if (awoken.has(s.id)) onStationClick(s) }}
+              />
+            )}
           </>
         ) : (
           <div style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
@@ -196,13 +231,13 @@ export function JourneyView({
           </div>
         )}
 
-        <MobileNavBar awoken={awoken} completed={completed} activeNav={activeNav} onNavChange={setActiveNav} />
+        <MobileNavBar awoken={awoken} completed={completed} activeNav={activeNav} onNavChange={setActiveNav} unreadAlerts={unread} slim={isShort} />
 
         {activeStation && activeNav === 'map' && (
           <ChapterPanel
             station={activeStation} lang={lang} completed={completed}
             isComplete={isComplete} onClose={onCloseChapter} onContinue={onContinue}
-            stIdx={stIdx} isMobile
+            stIdx={stIdx} isMobile sheetBottom={navHeight}
           />
         )}
 
@@ -210,7 +245,8 @@ export function JourneyView({
         {activeNav !== 'thema' && !(activeNav === 'map' && activeStation) && (
           <ThemaLauncher
             right={12}
-            bottom={activeNav === 'map' ? 160 : 68}
+            // clears the tab bar, plus the route strip and map credit on the map
+            bottom={activeNav === 'map' ? (isShort ? 88 : 160) : navHeight + 12}
             onExpand={() => setActiveNav('thema')}
           />
         )}
@@ -276,6 +312,7 @@ export function JourneyView({
               )}
             </div>
           )}
+          {delayPill}
           <span style={{ fontFamily: MONO, fontWeight: 500, fontSize: 11, color: D, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
             Ch. {STATIONS[stIdx]?.num ?? 'I'} / IX
           </span>
@@ -301,6 +338,7 @@ export function JourneyView({
           completed={completed}
           activeNav={activeNav}
           onNavChange={setActiveNav}
+          unreadAlerts={unread}
         />
 
         {/* Col 2 — Centre */}

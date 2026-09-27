@@ -43,6 +43,9 @@ export function ThemaLauncher({ bottom, right, onExpand }: ThemaLauncherProps) {
             ...(isMobile
               ? { left: 8, right: 8, bottom: bottom + 64 }
               : { right, bottom: bottom + 68, width: 380 }),
+            // Never taller than the space above the launcher
+            maxHeight: `calc(100dvh - ${bottom + 64 + 8}px)`,
+            display: 'flex', flexDirection: 'column',
             background: S, borderRadius: 10, overflow: 'hidden',
             border: '1px solid rgba(145,112,67,0.35)',
             boxShadow: '0 18px 48px rgba(62,35,24,0.25)',
@@ -50,7 +53,7 @@ export function ThemaLauncher({ bottom, right, onExpand }: ThemaLauncherProps) {
             fontFamily: SANS,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 12px 12px 14px', background: T, color: V }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 12px 12px 14px', background: T, color: V, flexShrink: 0 }}>
             <ThemaAvatar size={34} />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: DISPLAY, fontSize: 22, lineHeight: 1 }}>Thema</div>
@@ -74,7 +77,8 @@ export function ThemaLauncher({ bottom, right, onExpand }: ThemaLauncherProps) {
               <X size={16} strokeWidth={1.8} />
             </button>
           </div>
-          <ThemaChat height={isMobile ? '46dvh' : 340} autoFocus={!isMobile} />
+          {/* Messages take whatever height the panel has left, so it never runs off screen */}
+          <ThemaChat height="fill" maxHeight={isMobile ? '46dvh' : 340} autoFocus={!isMobile} />
         </div>
       )}
 

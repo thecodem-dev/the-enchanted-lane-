@@ -147,8 +147,9 @@ export function GoogleMapView({
   useEffect(() => {
     if (!wrapperRef.current) return
 
-    // Phones get a tighter frame and a collapsed (ⓘ) attribution so the route fills the screen
-    const narrow = wrapperRef.current.clientWidth < 640
+    // Small maps — narrow phones, or phones held sideways — get a tighter frame and a
+    // collapsed (ⓘ) credit so the route fills the screen
+    const narrow = wrapperRef.current.clientWidth < 640 || wrapperRef.current.clientHeight < 420
 
     const map = new maplibregl.Map({
       container: wrapperRef.current,
@@ -164,10 +165,17 @@ export function GoogleMapView({
 
     map.on('load', () => {
       setMapReady(true)
+      if (narrow) {
+        // MapLibre opens the compact credit expanded (and re-opens it on first render) — collapse it
+        // once the map has settled so it doesn't sit under the Depart and Thema buttons
+        const collapse = () => wrapperRef.current?.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show')
+        collapse()
+        map.once('idle', collapse)
+      }
       try {
         map.fitBounds(narrow ? STATION_BOUNDS : ROUTE_BOUNDS, {
           // extra room on the right for the weather tags beside each pin
-          padding: narrow ? { top: 48, bottom: 48, left: 32, right: 72 } : 80,
+          padding: narrow ? { top: 40, bottom: 32, left: 32, right: 72 } : 80,
           duration: 0,
         })
       } catch {
