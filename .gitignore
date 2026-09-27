@@ -12,3 +12,6 @@ vite.config.*.timestamp-*
 logs/
 *.log
 .tmp-*
+
+# Local Netlify folder
+.netlify

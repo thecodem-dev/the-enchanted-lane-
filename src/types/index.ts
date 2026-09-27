@@ -2,7 +2,7 @@
 export type Language = 'en' | 'zu' | 'af' | 'st'
 
 /** App phase — landing page, sign-in, intro splash, or the main journey */
-export type Phase = 'landing' | 'sign-in' | 'sign-up' | 'intro' | 'journey'
+export type Phase = 'landing' | 'sign-in' | 'intro' | 'journey'
 
 /** A single quiz question tied to a station */
 export interface QuizQuestion {

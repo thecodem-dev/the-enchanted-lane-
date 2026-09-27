@@ -1,11 +1,10 @@
 /**
  * auth.ts — passenger sign-in.
  *
- * Uses Supabase Auth when the public client configuration is present. The
- * local fallback is retained for demos that do not provide Supabase values.
+ * Local-only for now: the previously configured Supabase project is
+ * unreachable, so a signed-in session just lives on this device. Swap
+ * signIn() for a real service once one is available.
  */
-
-import { supabase } from './supabase'
 
 export interface Session {
   email: string
@@ -32,19 +31,10 @@ export function isValidEmail(email: string): boolean {
 }
 
 export class SignInError extends Error {}
-export class SignUpError extends Error {}
 
 export async function signIn(email: string, password: string): Promise<Session> {
   if (!isValidEmail(email) || password.length === 0) {
     throw new SignInError('That email and password combination didn’t work. Please try again.')
-  }
-
-  if (supabase) {
-    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
-    if (error || !data.user) throw new SignInError(error?.message ?? 'Unable to sign in.')
-    const session = { email: data.user.email ?? email.trim().toLowerCase(), signedInAt: Date.now() }
-    persistSession(session)
-    return session
   }
 
   const session: Session = { email: email.trim().toLowerCase(), signedInAt: Date.now() }
@@ -55,39 +45,6 @@ export async function signIn(email: string, password: string): Promise<Session> 
     // storage unavailable — memorySession covers this tab
   }
   return session
-}
-
-export async function signUp(firstName: string, lastName: string, email: string, password: string): Promise<{ needsEmailConfirmation: boolean; session: Session | null }> {
-  if (!isValidEmail(email) || password.length < 8 || !firstName.trim() || !lastName.trim()) {
-    throw new SignUpError('Enter your name, a valid email, and a password of at least 8 characters.')
-  }
-
-  if (supabase) {
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim(),
-      password,
-      options: { data: { first_name: firstName.trim(), last_name: lastName.trim() } },
-    })
-    if (error) throw new SignUpError(error.message)
-    const session = data.user?.email
-      ? { email: data.user.email, signedInAt: Date.now() }
-      : null
-    if (session) persistSession(session)
-    return { needsEmailConfirmation: !data.session, session }
-  }
-
-  const session = { email: email.trim().toLowerCase(), signedInAt: Date.now() }
-  persistSession(session)
-  return { needsEmailConfirmation: false, session }
-}
-
-function persistSession(session: Session) {
-  memorySession = session
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
-  } catch {
-    // memorySession covers this tab when storage is unavailable.
-  }
 }
 
 export function signOut() {
