@@ -1,10 +1,13 @@
 import { Logo } from "@/components/ui/Logo";
-import { SIGN_IN_PATH, goToSignIn } from "@/lib/navigation";
+import { AUTH_ENABLED } from "@/lib/auth";
+import { BOARD_PATH, SIGN_IN_PATH, goToBoard, goToSignIn } from "@/lib/navigation";
 
 const LINKS = [
   { href: "#route", label: "Route" },
   { href: "#features", label: "Features" },
-  { href: SIGN_IN_PATH, label: "Sign In", onClick: goToSignIn },
+  AUTH_ENABLED
+    ? { href: SIGN_IN_PATH, label: "Sign In", onClick: goToSignIn }
+    : { href: BOARD_PATH, label: "Board the Train", onClick: goToBoard },
 ];
 
 export function Footer() {

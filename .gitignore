@@ -12,3 +12,6 @@ vite.config.*.timestamp-*
 logs/
 *.log
 .tmp-*
+
+# macOS Finder files
+.DS_Store

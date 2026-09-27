@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
-import { getSession } from "@/lib/auth";
+import { AUTH_ENABLED, getSession } from "@/lib/auth";
 import { BOARD_PATH, SIGN_IN_PATH, goToBoard, goToSignIn } from "@/lib/navigation";
 
 const NAV = [
@@ -23,7 +23,7 @@ export function Header() {
   }, []);
 
   // Signed-in passengers skip straight to boarding.
-  const signedIn = getSession() !== null;
+  const signedIn = !AUTH_ENABLED || getSession() !== null;
 
   // Over the video the header is see-through; once solid (scrolled or menu open) it turns cream.
   const solid = scrolled || menuOpen;

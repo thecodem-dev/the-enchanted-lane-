@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { Toggle } from '@/components/ui/Toggle'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useOffline } from '@/hooks/useOffline'
-import { getSession } from '@/lib/auth'
+import { AUTH_ENABLED, getSession } from '@/lib/auth'
 import { resetPreferences, setPreference, usePreferences, type DelayThreshold, type TemperatureUnit, type TrainSpeed } from '@/lib/preferences'
 import { V, S, T, A, D, R, DISPLAY, MONO, SANS } from '@/styles/tokens'
 import type { Language } from '@/types'
@@ -345,7 +345,9 @@ export function SettingsPanel({ lang, setLang, stIdx, completed, onResetJourney,
           />
           <SettingRow
             label="Saved on this device"
-            hint="Your settings, journey progress, saved trip and sign-in. Resetting restores the settings above; your journey, trip and sign-in stay."
+            hint={AUTH_ENABLED
+              ? 'Your settings, journey progress, saved trip and sign-in. Resetting restores the settings above; your journey, trip and sign-in stay.'
+              : 'Your settings, journey progress and saved trip. Resetting restores the settings above; your journey and trip stay.'}
             control={confirmingDefaults ? (
               <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <button style={solidButton} onClick={() => { resetPreferences(); setConfirmingDefaults(false) }}>Yes, reset</button>
@@ -357,15 +359,17 @@ export function SettingsPanel({ lang, setLang, stIdx, completed, onResetJourney,
           />
         </Section>
 
-        {/* ── Passenger ── */}
-        <Section title="Passenger" description="The account you boarded with.">
-          <SettingRow
-            first
-            label="Signed in as"
-            hint={session?.email ?? 'Passenger'}
-            control={<button style={outlineButton} onClick={onSignOut}>Sign out</button>}
-          />
-        </Section>
+        {/* ── Passenger (hidden while sign-in is switched off) ── */}
+        {AUTH_ENABLED && (
+          <Section title="Passenger" description="The account you boarded with.">
+            <SettingRow
+              first
+              label="Signed in as"
+              hint={session?.email ?? 'Passenger'}
+              control={<button style={outlineButton} onClick={onSignOut}>Sign out</button>}
+            />
+          </Section>
+        )}
 
         {/* ── About ── */}
         <Section title="About" description="The app, and the open data it runs on.">

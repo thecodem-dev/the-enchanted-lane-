@@ -7,6 +7,14 @@
 
 import { supabase } from './supabase'
 
+/**
+ * TEMPORARILY OFF — passengers go straight from the landing page to the
+ * language picker, with no sign-in or sign-up. Set to `true` to bring back
+ * the /sign-in and /sign-up pages, the landing "Sign In" links and
+ * Settings › Passenger.
+ */
+export const AUTH_ENABLED = false
+
 export interface Session {
   email: string
   signedInAt: number

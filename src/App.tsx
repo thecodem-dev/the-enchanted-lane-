@@ -17,7 +17,7 @@ import { IntroScreen } from '@/components/IntroScreen'
 import { JourneyView } from '@/components/JourneyView'
 import { OfflineBanner } from '@/components/OfflineBanner'
 import { useTrainAnimation } from '@/hooks/useTrainAnimation'
-import { getSession, signOut } from '@/lib/auth'
+import { AUTH_ENABLED, getSession, signOut } from '@/lib/auth'
 import { setPreference, usePreferences } from '@/lib/preferences'
 import { clearThemaChat } from '@/lib/themaChat'
 import { hasBoarded, saveJourney } from '@/lib/journeyStore'
@@ -30,21 +30,26 @@ import type { Language, Phase } from '@/types'
  * signed-out → /board goes to /sign-in; signed-in → /sign-in goes to /board.
  * An in-progress journey is kept rather than restarted.
  */
-function phaseForUrl(prev: Phase): Phase {
+function phaseForUrl(prev: Phase, initial = false): Phase {
   const route = routeFromPath(window.location.pathname)
-  const signedIn = getSession() !== null
+  // With sign-in switched off (see AUTH_ENABLED) every visitor can board,
+  // and /sign-in and /sign-up redirect to the language picker
+  const signedIn = !AUTH_ENABLED || getSession() !== null
 
   if (route === 'landing') return 'landing'
   if (route === 'board' && !signedIn) { redirect(SIGN_IN_PATH); return 'sign-in' }
   if (route === 'sign-in' && !signedIn) return 'sign-in'
   if (route === 'sign-up' && !signedIn) return 'sign-up'
   redirect(BOARD_PATH)
-  // Passengers who've boarded before go straight back to their journey
-  return prev === 'journey' || hasBoarded() ? 'journey' : 'intro'
+  if (prev === 'journey') return 'journey'
+  // Boarding from the landing page always starts at the language picker;
+  // reopening /board directly resumes a journey already under way
+  if (!initial && prev === 'landing') return 'intro'
+  return hasBoarded() ? 'journey' : 'intro'
 }
 
 export default function App() {
-  const [phase, setPhase] = useState<Phase>(() => phaseForUrl('landing'))
+  const [phase, setPhase] = useState<Phase>(() => phaseForUrl('landing', true))
   const { language: lang, reduceMotion } = usePreferences()
   const setLang = (l: Language) => setPreference('language', l)
 
