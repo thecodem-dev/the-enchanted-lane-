@@ -4,7 +4,7 @@ import heroVideo from '@/assets/landing/enchanted-header-vid2.webm'
 import { Logo } from '@/components/ui/Logo'
 import { useIsMobile, useIsShort } from '@/hooks/useIsMobile'
 import { SignInError, isValidEmail, signIn } from '@/lib/auth'
-import { BOARD_PATH, LANDING_PATH, goToLanding, navigate } from '@/lib/navigation'
+import { BOARD_PATH, LANDING_PATH, SIGN_UP_PATH, goToLanding, navigate } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
 
 type FieldErrors = { email?: string; password?: string }
@@ -21,8 +21,7 @@ const inputClass =
   'w-full rounded-btn border bg-cream px-4 py-3 text-[15px] text-espresso placeholder:text-espresso/40 transition-colors focus:border-brass'
 
 /**
- * SignInPage — passengers sign in before boarding. Sign-in only: there is no
- * self-service registration. Styled as part of the landing page, whose hero
+ * SignInPage — passengers sign in before boarding. Styled as part of the landing page, whose hero
  * footage fills the left half on larger screens.
  */
 export function SignInPage() {
@@ -186,6 +185,9 @@ export function SignInPage() {
               {pending ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
+          <button type="button" onClick={() => navigate(SIGN_UP_PATH)} className="text-label mt-5 text-espresso/70 underline-offset-4 hover:text-espresso hover:underline">
+            New here? Create an account
+          </button>
         </div>
 
         <p className="text-[12px] tracking-[0.04em] text-espresso/60">© {new Date().getFullYear()} The Enchanted Lane</p>

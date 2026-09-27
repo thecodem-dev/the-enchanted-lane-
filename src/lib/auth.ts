@@ -1,12 +1,11 @@
 /**
  * auth.ts — passenger sign-in.
  *
- * ⚠ PLACEHOLDER. There is no backend yet: signIn() accepts any well-formed
- * email with a non-empty password and keeps the session in localStorage.
- * It is NOT access control — anyone can get past it. Replace signIn() (and
- * signOut(), if the real service needs it) with the real identity provider;
- * the rest of the app only depends on the Session shape and these functions.
+ * Uses Supabase Auth when the public client configuration is present. The
+ * local fallback is retained for demos that do not provide Supabase values.
  */
+
+import { supabase } from './supabase'
 
 export interface Session {
   email: string
@@ -33,13 +32,19 @@ export function isValidEmail(email: string): boolean {
 }
 
 export class SignInError extends Error {}
+export class SignUpError extends Error {}
 
 export async function signIn(email: string, password: string): Promise<Session> {
-  // TODO: replace with a call to the real sign-in service.
-  await new Promise(resolve => setTimeout(resolve, 600))
-
   if (!isValidEmail(email) || password.length === 0) {
     throw new SignInError('That email and password combination didn’t work. Please try again.')
+  }
+
+  if (supabase) {
+    const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+    if (error || !data.user) throw new SignInError(error?.message ?? 'Unable to sign in.')
+    const session = { email: data.user.email ?? email.trim().toLowerCase(), signedInAt: Date.now() }
+    persistSession(session)
+    return session
   }
 
   const session: Session = { email: email.trim().toLowerCase(), signedInAt: Date.now() }
@@ -50,6 +55,39 @@ export async function signIn(email: string, password: string): Promise<Session> 
     // storage unavailable — memorySession covers this tab
   }
   return session
+}
+
+export async function signUp(firstName: string, lastName: string, email: string, password: string): Promise<{ needsEmailConfirmation: boolean; session: Session | null }> {
+  if (!isValidEmail(email) || password.length < 8 || !firstName.trim() || !lastName.trim()) {
+    throw new SignUpError('Enter your name, a valid email, and a password of at least 8 characters.')
+  }
+
+  if (supabase) {
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { first_name: firstName.trim(), last_name: lastName.trim() } },
+    })
+    if (error) throw new SignUpError(error.message)
+    const session = data.user?.email
+      ? { email: data.user.email, signedInAt: Date.now() }
+      : null
+    if (session) persistSession(session)
+    return { needsEmailConfirmation: !data.session, session }
+  }
+
+  const session = { email: email.trim().toLowerCase(), signedInAt: Date.now() }
+  persistSession(session)
+  return { needsEmailConfirmation: false, session }
+}
+
+function persistSession(session: Session) {
+  memorySession = session
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+  } catch {
+    // memorySession covers this tab when storage is unavailable.
+  }
 }
 
 export function signOut() {
